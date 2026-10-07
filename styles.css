@@ -1,23 +1,23 @@
 /* Milo v1.1.6 — site design system (from-scratch rebuild) */
 
 :root {
-  --bg: #0b0a08;
-  --bg-soft: #12100c;
-  --surface: #171410;
-  --surface-2: #1e1a14;
+  --bg: #0c1a15;
+  --bg-soft: #0f211a;
+  --surface: #122620;
+  --surface-2: #16281f;
   --card: rgba(255, 248, 235, 0.035);
   --ink: #faf3e8;
   --ink-dim: #c9bda6;
   --ink-faint: #8a7d66;
   --ink-ghost: #5d5342;
-  --amber: #ffb020;
-  --amber-deep: #c26a00;
-  --coral: #ff5c39;
+  --amber: #5eead4;
+  --amber-deep: #0d9488;
+  --coral: #fbbf24;
   --mint: #4ade80;
   --line: rgba(250, 243, 232, 0.09);
   --line-strong: rgba(250, 243, 232, 0.16);
-  --glow-amber: rgba(255, 176, 32, 0.22);
-  --glow-coral: rgba(255, 92, 57, 0.14);
+  --glow-amber: rgba(94, 234, 212, 0.2);
+  --glow-coral: rgba(251, 191, 36, 0.13);
   --font:
     ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Inter,
     "Helvetica Neue", Arial, sans-serif;
