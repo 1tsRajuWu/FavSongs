@@ -6,168 +6,19 @@
     <title>FavSongs — your favourite music, shareable</title>
     <meta name="description" content="Save your favourite songs, import from Spotify, Apple Music and YouTube, and share your shelf with one link." />
     <link rel="canonical" href="https://favsongs.pages.dev/" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2334d399'/%3E%3Crect x='9' y='14' width='3.4' height='10' rx='1.7' fill='%230b0a08'/%3E%3Crect x='14.3' y='9' width='3.4' height='15' rx='1.7' fill='%230b0a08'/%3E%3Crect x='19.6' y='13' width='3.4' height='11' rx='1.7' fill='%230b0a08' opacity='.6'/%3E%3C/svg%3E" type="image/svg+xml" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ffb020'/%3E%3Cpath d='M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z' fill='%230b0a08'/%3E%3Ccircle cx='23' cy='8.6' r='2' fill='%230b0a08' opacity='.5'/%3E%3C/svg%3E" type="image/svg+xml" />
     <link rel="stylesheet" href="styles.css" />
-    <style>
-      body.fav-page { min-height: 100svh; display: flex; flex-direction: column; }
-      .fav-top {
-        display: flex; align-items: center; justify-content: space-between;
-        max-width: 1120px; margin: 0 auto; width: 100%;
-        padding: 1rem var(--rail);
-      }
-      .fav-brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; font-size: 1.15rem; text-decoration: none; color: var(--ink); }
-      .fav-brand svg { width: 30px; height: 30px; }
-      .fav-hero { padding: clamp(2.5rem, 6vw, 4.5rem) var(--rail) 1.5rem; position: relative; overflow: clip; }
-      .fav-hero-grid {
-        position: relative; max-width: 1120px; margin: 0 auto;
-        display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(1.5rem, 5vw, 4rem);
-        align-items: center;
-      }
-      @media (max-width: 820px) { .fav-hero-grid { grid-template-columns: 1fr; } }
-      .fav-eyebrow {
-        display: inline-flex; align-items: center; gap: 0.5rem;
-        font-size: 0.76rem; letter-spacing: 0.16em; text-transform: uppercase;
-        color: var(--ink-faint); margin: 0 0 0.9rem;
-        padding: 0.34rem 0.8rem; border: 1px solid var(--line); border-radius: 999px;
-        background: rgba(255,255,255,0.03);
-      }
-      .fav-eyebrow i { width: 7px; height: 7px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 10px var(--amber); animation: blink 1.8s ease-in-out infinite; }
-      @keyframes blink { 50% { opacity: 0.35; } }
-      .fav-hero h1 { font-size: clamp(2.4rem, 5.2vw, 4rem); letter-spacing: -0.03em; margin: 0 0 0.7rem; line-height: 1.02; }
-      .fav-hero h1 .grad { background: linear-gradient(120deg, var(--amber), var(--coral)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-      .fav-hero h1 em { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; letter-spacing: -0.01em; }
-      .fav-hero p { color: var(--ink-dim); font-size: 1.06rem; margin: 0 0 1.5rem; max-width: 46ch; }
-      .fav-cta { display: flex; gap: 0.7rem; flex-wrap: wrap; }
-      .hero-stack { position: relative; height: 380px; }
-      @media (max-width: 820px) { .hero-stack { height: 250px; max-width: 420px; } }
-      .hero-card {
-        position: absolute; width: 200px; padding: 0.7rem;
-        border-radius: 18px; border: 1px solid var(--line-strong);
-        background: linear-gradient(165deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), var(--shadow-card);
-        backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-        animation: floaty 7s ease-in-out infinite;
-      }
-      .hero-card img { width: 100%; aspect-ratio: 1; border-radius: 12px; object-fit: cover; display: block; background: var(--surface-2); }
-      .hero-card b { display: block; margin-top: 0.5rem; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .hero-card span { color: var(--ink-dim); font-size: 0.75rem; }
-      .hero-card.c1 { left: 4%; top: 6%; transform: rotate(-6deg); }
-      .hero-card.c2 { right: 2%; top: 0; animation-delay: -2.4s; }
-      .hero-card.c2-inner { transform: rotate(5deg); }
-      .hero-card.c3 { left: 22%; bottom: 0; animation-delay: -4.8s; }
-      .hero-card.c3-inner { transform: rotate(-3deg); }
-      @keyframes floaty { 0%,100% { margin-top: 0; } 50% { margin-top: -10px; } }
-      .marquee { overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-top: clamp(2rem, 5vw, 3.2rem); }
-      .marquee-track { display: flex; gap: 2.6rem; padding: 0.8rem 0; white-space: nowrap; width: max-content; animation: slide 26s linear infinite; color: var(--ink-faint); font-size: 0.85rem; letter-spacing: 0.12em; text-transform: uppercase; }
-      @keyframes slide { to { transform: translateX(-50%); } }
-      .fav-sec { max-width: 1120px; margin: 0 auto; width: 100%; padding: 1.5rem var(--rail); }
-      .fav-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 0 0 1rem; }
-      .fav-sec-head h2 { margin: 0; font-size: 1.3rem; letter-spacing: -0.01em; }
-      .fav-sec-head p { margin: 0; color: var(--ink-faint); font-size: 0.88rem; }
-      .shelf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.9rem; }
-      .song-card {
-        position: relative; display: flex; gap: 0.8rem; align-items: center;
-        padding: 0.7rem; border-radius: var(--r); border: 1px solid var(--line);
-        background: linear-gradient(165deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-        backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-        text-decoration: none; color: var(--ink);
-        animation: rise 0.5s var(--ease) both;
-        transition: transform 0.22s var(--ease), border-color 0.25s var(--ease), box-shadow 0.3s var(--ease);
-      }
-      .song-card:nth-child(2) { animation-delay: 0.05s; }
-      .song-card:nth-child(3) { animation-delay: 0.1s; }
-      .song-card:nth-child(4) { animation-delay: 0.15s; }
-      .song-card:nth-child(5) { animation-delay: 0.2s; }
-      .song-card:nth-child(6) { animation-delay: 0.25s; }
-      .song-card:hover { transform: translateY(-3px); border-color: var(--amber); box-shadow: 0 14px 36px -12px var(--glow-amber); }
-      .song-card img { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; flex: none; background: var(--surface-2); }
-      .song-card .t { min-width: 0; }
-      .song-card .t b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.95rem; }
-      .song-card .t span { color: var(--ink-dim); font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-      .song-card .x {
-        position: absolute; top: 6px; right: 6px; width: 24px; height: 24px;
-        border-radius: 50%; border: 1px solid var(--line); background: rgba(0,0,0,0.45);
-        color: var(--ink-dim); font-size: 13px; line-height: 1; cursor: pointer;
-        display: none; align-items: center; justify-content: center;
-      }
-      .song-card:hover .x, .song-card:focus-within .x { display: inline-flex; }
-      .song-card .x:hover { color: #fff; border-color: #fa243c; }
-      .fav-empty {
-        text-align: center; padding: 2.6rem 1.5rem; border: 1px dashed var(--line-strong);
-        border-radius: var(--r-lg); color: var(--ink-dim);
-        background:
-          radial-gradient(60% 100% at 50% 0%, var(--glow-amber), transparent 70%),
-          var(--card);
-      }
-      .fav-empty .big-note {
-        font-size: 2.2rem; display: block; margin-bottom: 0.6rem;
-        animation: floaty 5s ease-in-out infinite;
-      }
-      .fav-empty b { color: var(--ink); display: block; font-size: 1.05rem; margin-bottom: 0.3rem; }
-      .fav-empty p { margin: 0 auto 1.1rem; max-width: 44ch; }
-      .fav-empty .row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
-      .fav-add {
-        margin-top: 1.6rem; padding: 1.2rem; border-radius: var(--r-lg);
-        border: 1px solid var(--line); background: var(--card);
-      }
-      .fav-add h3 { margin: 0 0 0.8rem; font-size: 1.02rem; }
-      .fav-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.7rem; }
-      @media (max-width: 640px) { .fav-row { grid-template-columns: 1fr; } }
-      .fav-row label { display: grid; gap: 0.3rem; font-size: 0.8rem; color: var(--ink-faint); font-weight: 600; }
-      .fav-row input {
-        padding: 0.65rem 0.8rem; border-radius: 12px; border: 1px solid var(--line);
-        background: rgba(255,255,255,0.04); color: var(--ink); font-size: 0.95rem; width: 100%;
-      }
-      .fav-row input:focus { outline: none; border-color: var(--amber); }
-      .fav-actions { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; }
-      .fav-hint { font-size: 0.82rem; color: var(--ink-faint); }
-      .fav-import { display: flex; gap: 0.6rem; margin-top: 0.9rem; flex-wrap: wrap; }
-      .fav-import input {
-        flex: 1; min-width: 220px; padding: 0.65rem 0.9rem; border-radius: 12px;
-        border: 1px solid var(--line); background: rgba(255,255,255,0.04);
-        color: var(--ink); font-size: 0.92rem; width: auto;
-      }
-      .fav-import input::placeholder { color: var(--ink-ghost); }
-      .fav-import input:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px var(--glow-amber); }
-      .fav-import input { flex: 1; min-width: 220px; }
-      .shared-banner {
-        max-width: 1120px; margin: 1.2rem auto 0; width: calc(100% - 2 * var(--rail));
-        padding: 1rem 1.2rem; border-radius: var(--r-lg);
-        border: 1px solid var(--amber); background: linear-gradient(165deg, var(--glow-amber), transparent);
-        display: flex; gap: 1rem; align-items: center; justify-content: space-between; flex-wrap: wrap;
-      }
-      .shared-banner b { display: block; font-size: 1.02rem; }
-      .shared-banner span { color: var(--ink-dim); font-size: 0.86rem; }
-      .fav-foot { color: var(--ink-faint); font-size: 0.85rem; padding: 2.5rem var(--rail) 2.5rem; border-top: 1px solid var(--line); margin-top: 2rem; }
-      .fav-foot-grid { max-width: 1120px; margin: 0 auto 1.2rem; display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 1.5rem; }
-      @media (max-width: 640px) { .fav-foot-grid { grid-template-columns: 1fr; } }
-      .fav-foot-grid b { display: block; color: var(--ink); margin-bottom: 0.5rem; font-size: 0.9rem; }
-      .fav-foot-grid p { margin: 0; max-width: 36ch; }
-      .fav-foot-grid nav { display: grid; gap: 0.35rem; align-content: start; }
-      .fav-foot-grid nav a { color: var(--ink-dim); text-decoration: none; font-size: 0.87rem; width: fit-content; }
-      .fav-foot-grid nav a:hover { color: var(--ink); }
-      .fav-copy { text-align: center; color: var(--ink-ghost); font-size: 0.8rem; margin: 0; }
-      /* Single-accent buttons: emerald throughout (no pink split). */
-      .btn-primary {
-        background: linear-gradient(135deg, var(--amber), var(--amber-deep));
-        color: #06110c;
-      }
-      @keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
-      [hidden] {
-        display: none !important;
-      }
-      @media (prefers-reduced-motion: reduce) { .song-card { animation: none; } }
-    </style>
+
   </head>
   <body class="fav-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="fav-top">
       <a class="fav-brand" href="index.html" aria-label="FavSongs home">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#34d399"/><rect x="9" y="14" width="3.4" height="10" rx="1.7" fill="#0b0a08"/><rect x="14.3" y="9" width="3.4" height="15" rx="1.7" fill="#0b0a08"/><rect x="19.6" y="13" width="3.4" height="11" rx="1.7" fill="#0b0a08" opacity=".6"/></svg>
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#ffb020"/><path d="M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z" fill="#0b0a08"/><circle cx="23" cy="8.6" r="2" fill="#0b0a08" opacity=".5"/></svg>
         FavSongs
       </a>
       <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
+      <a class="btn btn-sm" href="shelf.html" style="text-decoration:none">My shelf</a>
       <span id="authArea"></span>
     </header>
 
@@ -179,70 +30,21 @@
             <h1>Your favourite music, <span class="grad">shareable</span> — with <em>feeling.</em></h1>
             <p>Save the songs you love, import from Spotify, Apple Music and YouTube, then share your whole shelf with one link.</p>
             <div class="fav-cta">
-              <a class="btn btn-primary" href="#shelf">Build your shelf →</a>
-              <a class="btn" id="exampleShelf" href="#shelf">See an example shelf</a>
+              <a class="btn btn-primary" href="shelf.html">Build your shelf →</a>
+              <a class="btn" href="shelf.html#p=W3sidCI6ICJHaG9zdCIsICJhIjogIkp1c3RpbiBCaWViZXIiLCAiYWwiOiAiIiwgImFydCI6ICIiLCAidSI6ICJodHRwczovL29wZW4uc3BvdGlmeS5jb20vdHJhY2svNkkzbXFUd2hScG4zNFNMVmFmU0g3RyJ9LCB7InQiOiAiQmxpbmRpbmcgTGlnaHRzIiwgImEiOiAiVGhlIFdlZWtuZCIsICJhbCI6ICJBZnRlciBIb3VycyIsICJhcnQiOiAiIiwgInUiOiAiIn1d">See an example shelf</a>
             </div>
           </div>
           <div class="hero-stack" aria-hidden="true">
-            <div class="hero-card c1"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e0/92/da/e092da2d-9f6d-11dc-7843-2021e95a2b61/21UMGIM17518.rgb.jpg/600x600bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>Ghost</b><span>Justin Bieber</span></div>
-            <div class="hero-card c2"><div class="c2-inner"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e0/92/da/e092da2d-9f6d-11dc-7843-2021e95a2b61/21UMGIM17518.rgb.jpg/100x100bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>Ghost</b><span>Justice · 2021</span></div></div>
-            <div class="hero-card c3"><div class="c3-inner"><img src="icon.svg" alt="" loading="lazy" /><b>Your shelf</b><span>Shareable link</span></div></div>
+            <div class="hero-card c1"><div class="c1-inner"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/1a/37/d1/1a37d1b1-8508-54f2-f541-bf4e437dda76/19UMGIM05028.rgb.jpg/600x600bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>when the party's over</b><span>Billie Eilish</span></div></div>
+            <div class="hero-card c2"><div class="c2-inner"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/6c/11/d6/6c11d681-aa3a-d59e-4c2e-f77e181026ab/190295092665.jpg/600x600bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>Levitating</b><span>Dua Lipa</span></div></div>
+            <div class="hero-card c3"><div class="c3-inner"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e0/92/da/e092da2d-9f6d-11dc-7843-2021e95a2b61/21UMGIM17518.rgb.jpg/600x600bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>Ghost</b><span>Justin Bieber · my pick</span></div></div>
           </div>
         </div>
         <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
       </section>
 
-      <div class="shared-banner" id="sharedBanner" hidden>
-        <div><b id="sharedTitle">Someone shared their shelf with you</b><span id="sharedSub"></span></div>
-        <div class="fav-actions">
-          <button class="btn btn-primary btn-sm" id="saveAllBtn" type="button">Save all to my shelf</button>
-          <button class="btn btn-sm" id="dismissSharedBtn" type="button">Dismiss</button>
-        </div>
-      </div>
 
-      <section class="fav-sec" id="shelf">
-        <div class="fav-sec-head">
-          <h2 id="shelfTitle">Your shelf</h2>
-          <p id="shelfMeta"></p>
-        </div>
-        <div class="shelf-grid" id="shelfGrid"></div>
-        <div class="fav-empty" id="shelfEmpty" hidden>
-          <span class="big-note" aria-hidden="true">♪</span>
-          <b>Your shelf is waiting for its first track</b>
-          <p>Add one below, import a link, or peek at an example shelf to see how sharing looks.</p>
-          <div class="row">
-            <button class="btn btn-primary btn-sm" id="emptyExampleBtn" type="button">See an example shelf</button>
-          </div>
-        </div>
-        <div class="fav-actions" id="shareRow" hidden style="margin-top:1rem">
-          <button class="btn btn-primary" id="shareBtn" type="button">Copy share link</button>
-          <span class="fav-hint" id="shareHint">Anyone opening it sees this shelf.</span>
-          <label class="fav-hint" id="publicWrap" hidden style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer">
-            <input type="checkbox" id="publicToggle" /> Public shelf
-          </label>
-          <button class="btn btn-sm" id="syncBtn" type="button" hidden>Sync now</button>
-        </div>
 
-        <div class="fav-add" id="addBox">
-          <h3>Add a song</h3>
-          <div class="fav-row">
-            <label>Title<input id="fTitle" maxlength="120" placeholder="Blinding Lights" autocomplete="off" /></label>
-            <label>Artist<input id="fArtist" maxlength="120" placeholder="The Weeknd" autocomplete="off" /></label>
-          </div>
-          <div class="fav-row">
-            <label>Link (optional)<input id="fLink" placeholder="https://open.spotify.com/track/…" spellcheck="false" autocomplete="off" /></label>
-            <label>Artwork URL (optional)<input id="fArt" placeholder="https://… .jpg" spellcheck="false" autocomplete="off" /></label>
-          </div>
-          <div class="fav-actions">
-            <button class="btn btn-primary" id="addBtn" type="button">Add to shelf</button>
-          </div>
-          <div class="fav-import">
-            <input id="importLink" placeholder="Paste a Spotify / YouTube track link to import…" spellcheck="false" autocomplete="off" />
-            <button class="btn" id="importBtn" type="button">Import</button>
-            <span class="fav-hint" id="importHint">Spotify + YouTube links auto-fill title, artist and art. Apple Music links need a manual touch.</span>
-          </div>
-        </div>
-      </section>
 
       <section class="fav-sec" id="discover" hidden>
         <div class="fav-sec-head">
@@ -260,7 +62,7 @@
           </div>
           <nav aria-label="Product">
             <b>Product</b>
-            <a href="#shelf">Your shelf</a>
+            <a href="shelf.html">Your shelf</a>
             <a href="song.html">Sample song</a>
           </nav>
           <nav aria-label="Legal">
@@ -276,408 +78,31 @@
     </main>
 
     <script src="site.js"></script>
-    <script src="supabase-config.js" onerror="this.remove()"></script>
-    <script type="module">
-      // Cloud shelves (Supabase + Google auth). Entirely optional: without
-      // supabase-config.js the page is a fully working local shelf app.
-      import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-      const B = window.FavShelf;
-      const authArea = document.getElementById("authArea");
-      const URL = window.FAVSONGS_SUPABASE_URL || "";
-      const KEY = window.FAVSONGS_SUPABASE_ANON_KEY || "";
-      const configured = URL.startsWith("https://") && !URL.includes("YOUR_NEW") && KEY.length > 20;
-
-      function authBtn(label, fn, primary) {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "btn btn-sm" + (primary ? " btn-primary" : "");
-        b.textContent = label;
-        b.addEventListener("click", fn);
-        authArea.innerHTML = "";
-        authArea.appendChild(b);
-      }
-
-      if (!configured) {
-        const s = document.createElement("span");
-        s.className = "fav-hint";
-        s.textContent = "Local shelf";
-        s.title = "Add supabase-config.js to enable Google sign-in + cloud sync";
-        authArea.appendChild(s);
-      } else {
-        const sb = createClient(URL, KEY);
-        const keyOf = (s) => ((s.t || "") + "|||" + (s.a || "")).toLowerCase();
-
-        async function myShelfRow(userId) {
-          const { data } = await sb.from("shelves").select("id,title,is_public").eq("user_id", userId).maybeSingle();
-          if (data) return data;
-          const { data: created, error } = await sb.from("shelves").insert({ user_id: userId, title: "My shelf" }).select("id,title,is_public").single();
-          if (error) throw error;
-          return created;
-        }
-        async function cloudSongs(shelfId) {
-          const { data, error } = await sb.from("shelf_songs").select("id,title,artist,album,art,url").eq("shelf_id", shelfId).order("position");
-          if (error) throw error;
-          return (data || []).map((r) => ({ id: r.id, t: r.title, a: r.artist || "", al: r.album || "", art: r.art || "", u: r.url || "" }));
-        }
-        async function merge() {
-          const { data: { session } } = await sb.auth.getSession();
-          if (!session) return false;
-          const row = await myShelfRow(session.user.id);
-          const cloud = await cloudSongs(row.id);
-          const local = B.loadShelf();
-          const have = new Set(cloud.map(keyOf));
-          const missing = local.filter((s) => !have.has(keyOf(s)));
-          if (missing.length) {
-            await sb.from("shelf_songs").insert(missing.map((s, i) => ({
-              shelf_id: row.id, title: s.t, artist: s.a || "", album: s.al || "",
-              art: s.art || "", url: s.u || "", position: cloud.length + i,
-            })));
-          }
-          const fresh = await cloudSongs(row.id);
-          B.saveShelf(fresh.map((s) => ({ ...s })));
-          B.render();
-          const tgl = document.getElementById("publicToggle");
-          if (tgl) {
-            tgl.checked = !!row.is_public;
-            document.getElementById("publicWrap").hidden = false;
-          }
-          document.getElementById("syncBtn").hidden = false;
-          return true;
-        }
-
-        sb.auth.onAuthStateChange(() => location.reload());
-        sb.auth.getSession().then(async ({ data: { session } }) => {
-          if (!session) {
-            authBtn("Sign in with Google", () => {
-              sb.auth.signInWithOAuth({
-                provider: "google",
-                options: { redirectTo: location.origin + location.pathname },
-              });
-            }, true);
-            loadDiscover();
-            return;
-          }
-          const meta = session.user.user_metadata || {};
-          const name = meta.full_name || meta.name || session.user.email || "you";
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "btn btn-sm";
-          b.title = "Signed in as " + name + " — click to sign out";
-          b.textContent = "● " + String(name).split(" ")[0];
-          b.addEventListener("click", async () => {
-            if (confirm("Sign out of FavSongs?")) await sb.auth.signOut();
-          });
-          authArea.innerHTML = "";
-          authArea.appendChild(b);
-          try {
-            await merge();
-          } catch (e) {
-            console.warn("cloud sync failed", e);
-          }
-          loadDiscover();
-
-          document.getElementById("syncBtn").addEventListener("click", async () => {
-            try { await merge(); } catch (e) { console.warn(e); }
-          });
-          const tgl = document.getElementById("publicToggle");
-          if (tgl) {
-            tgl.addEventListener("change", async () => {
-              const { data: { session: s2 } } = await sb.auth.getSession();
-              if (!s2) return;
-              const row = await myShelfRow(s2.user.id);
-              await sb.from("shelves").update({ is_public: tgl.checked }).eq("id", row.id);
-              loadDiscover();
-            });
-          }
-        });
-
-        async function loadDiscover() {
-          try {
-            const { data, error } = await sb
-              .from("shelves")
-              .select("id,title,updated_at,shelf_songs(count)")
-              .eq("is_public", true)
-              .order("updated_at", { ascending: false })
-              .limit(12);
-            if (error || !data || !data.length) return;
-            const sec = document.getElementById("discover");
-            const grid = document.getElementById("discoverGrid");
-            grid.innerHTML = "";
-            sec.hidden = false;
-            for (const row of data) {
-              const n = (row.shelf_songs && row.shelf_songs[0] && row.shelf_songs[0].count) || 0;
-              const card = document.createElement("button");
-              card.type = "button";
-              card.className = "song-card";
-              card.style.cursor = "pointer";
-              const t = document.createElement("div");
-              t.className = "t";
-              const b = document.createElement("b");
-              b.textContent = row.title || "Untitled shelf";
-              const sp = document.createElement("span");
-              const when = row.updated_at ? new Date(row.updated_at).toLocaleDateString() : "";
-              sp.textContent = n + " song" + (n === 1 ? "" : "s") + (when ? " · " + when : "");
-              t.appendChild(b);
-              t.appendChild(sp);
-              card.appendChild(t);
-              card.addEventListener("click", async () => {
-                const songs = await cloudSongs(row.id);
-                if (!songs.length) return;
-                const p = btoa(unescape(encodeURIComponent(JSON.stringify(
-                  songs.map((s) => ({ t: s.t, a: s.a, al: s.al, art: s.art, u: s.u })),
-                )))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-                location.hash = "#p=" + p;
-                location.reload();
-              });
-              grid.appendChild(card);
-            }
-          } catch (e) {
-            console.warn("discover failed", e);
-          }
-        }
-      }
-    </script>
     <script>
       (() => {
         "use strict";
-        const LS_KEY = "favsongs.shelf.v1";
-        const SHARE_CAP = 12;
-        const $ = (id) => document.getElementById(id);
-
-        const escRe = /["'<>\\s]/;
-        function cleanStr(s, max) {
-          return String(s || "").trim().slice(0, max || 120);
-        }
-        function safeHttps(u) {
-          const s = String(u || "").trim();
-          return /^https:\/\/[^"'<>\s]+$/i.test(s) ? s : "";
-        }
-
-        function loadShelf() {
-          try {
-            const raw = localStorage.getItem(LS_KEY);
-            const arr = raw ? JSON.parse(raw) : [];
-            return Array.isArray(arr) ? arr.filter((s) => s && s.t) : [];
-          } catch { return []; }
-        }
-        function saveShelf(shelf) {
-          try { localStorage.setItem(LS_KEY, JSON.stringify(shelf)); } catch { /* private mode */ }
-        }
-
-        function songPageUrl(s) {
-          const p = new URLSearchParams();
-          p.set("t", s.t);
-          if (s.a) p.set("a", s.a);
-          if (s.al) p.set("al", s.al);
-          if (s.art) p.set("art", s.art);
-          if (s.u) p.set("u", s.u);
-          return "song.html?" + p.toString();
-        }
-
-        function cardEl(s, mine) {
-          const a = document.createElement("a");
-          a.className = "song-card";
-          a.href = songPageUrl(s);
-          const img = document.createElement("img");
-          img.alt = "";
-          img.loading = "lazy";
-          img.width = 56;
-          img.height = 56;
-          if (s.art) {
-            img.src = s.art;
-            img.onerror = () => { img.src = "icon.svg"; img.onerror = null; };
-          } else {
-            img.src = "icon.svg";
-          }
-          const t = document.createElement("div");
-          t.className = "t";
-          const b = document.createElement("b");
-          b.textContent = s.t;
-          const sp = document.createElement("span");
-          sp.textContent = s.a || "Unknown artist";
-          t.appendChild(b);
-          t.appendChild(sp);
-          a.appendChild(img);
-          a.appendChild(t);
-          if (mine) {
-            const x = document.createElement("button");
-            x.className = "x";
-            x.type = "button";
-            x.textContent = "×";
-            x.setAttribute("aria-label", "Remove " + s.t);
-            x.addEventListener("click", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              const shelf = loadShelf().filter((o) => o.id !== s.id);
-              saveShelf(shelf);
-              render();
-            });
-            a.appendChild(x);
-          }
-          return a;
-        }
-
-        function render() {
-          const shelf = loadShelf();
-          const grid = $("shelfGrid");
-          grid.innerHTML = "";
-          $("shelfTitle").textContent = "Your shelf";
-          $("shelfMeta").textContent = shelf.length ? shelf.length + " song" + (shelf.length > 1 ? "s" : "") : "";
-          $("shelfEmpty").hidden = shelf.length > 0;
-          $("shareRow").hidden = shelf.length === 0;
-          for (const s of shelf) grid.appendChild(cardEl(s, true));
-        }
-
-        function encodeShare(shelf) {
-          const slim = shelf.slice(0, SHARE_CAP).map((s) => ({
-            t: s.t, a: s.a || "", al: s.al || "", art: s.art || "", u: s.u || "",
-          }));
-          const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(slim))))
-            .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-          return location.origin + location.pathname + "#p=" + b64;
-        }
-
-        function decodeShare(hash) {
-          try {
-            const b64 = hash.replace(/^#p=/, "").replace(/-/g, "+").replace(/_/g, "/");
-            const arr = JSON.parse(decodeURIComponent(escape(atob(b64))));
-            if (!Array.isArray(arr)) return [];
-            return arr
-              .filter((s) => s && typeof s.t === "string" && s.t.trim())
-              .slice(0, 24)
-              .map((s, i) => ({
-                id: "shared-" + Date.now() + "-" + i,
-                t: cleanStr(s.t), a: cleanStr(s.a), al: cleanStr(s.al),
-                art: safeHttps(s.art), u: safeHttps(s.u),
-              }));
-          } catch { return []; }
-        }
-
-        // Shared-shelf view (#p= link).
-        const shared = decodeShare(location.hash || "");
-        if (shared.length) {
-          document.getElementById("sharedBanner").hidden = false;
-          document.getElementById("sharedSub").textContent =
-            shared.length + " song" + (shared.length > 1 ? "s" : "") + " — save them or just press play.";
-          const grid = $("shelfGrid");
-          grid.innerHTML = "";
-          $("shelfTitle").textContent = "Shared shelf";
-          $("shelfMeta").textContent = shared.length + " songs";
-          $("shelfEmpty").hidden = true;
-          $("shareRow").hidden = true;
-          $("addBox").hidden = true;
-          for (const s of shared) grid.appendChild(cardEl(s, false));
-          $("saveAllBtn").addEventListener("click", () => {
-            const mine = loadShelf();
-            const have = new Set(mine.map((o) => (o.t + "|||" + o.a).toLowerCase()));
-            let n = 0;
-            for (const s of shared) {
-              const key = (s.t + "|||" + s.a).toLowerCase();
-              if (!have.has(key)) {
-                have.add(key);
-                mine.push({ ...s, id: "mine-" + Date.now() + "-" + n++ });
-              }
-            }
-            saveShelf(mine);
-            history.replaceState(null, "", location.pathname);
-            location.reload();
-          });
-          $("dismissSharedBtn").addEventListener("click", () => {
-            history.replaceState(null, "", location.pathname);
-            location.reload();
-          });
-        } else {
-          render();
-        }
-
-        $("shareBtn").addEventListener("click", async () => {
-          const shelf = loadShelf();
-          if (!shelf.length) return;
-          const link = encodeShare(shelf);
-          try {
-            await navigator.clipboard.writeText(link);
-            $("shareHint").textContent = "Copied — anyone opening it sees this shelf.";
-          } catch {
-            prompt("Copy your share link:", link);
-          }
-        });
-
-        $("addBtn").addEventListener("click", () => {
-          const t = cleanStr($("fTitle").value);
-          if (!t) { $("fTitle").focus(); return; }
-          const shelf = loadShelf();
-          shelf.push({
-            id: "mine-" + Date.now(),
-            t, a: cleanStr($("fArtist").value),
-            al: "", art: safeHttps($("fArt").value), u: safeHttps($("fLink").value),
-          });
-          saveShelf(shelf);
-          $("fTitle").value = $("fArtist").value = $("fLink").value = $("fArt").value = "";
-          render();
-        });
-
-        // Import: Spotify + YouTube oEmbed auto-fill, Apple = manual.
-        $("importBtn").addEventListener("click", async () => {
-          const raw = $("importLink").value.trim();
-          const hint = $("importHint");
-          if (!/^https:\/\//i.test(raw)) { hint.textContent = "Paste an https:// track link first."; return; }
-          hint.textContent = "Resolving…";
-          try {
-            const u = new URL(raw);
-            const host = u.hostname.toLowerCase().replace(/^www\./, "");
-            let ep = null;
-            if (host === "open.spotify.com" || host === "spotify.com") {
-              ep = "https://open.spotify.com/oembed?url=" + encodeURIComponent(raw);
-            } else if (host === "youtube.com" || host === "youtu.be" || host === "music.youtube.com") {
-              ep = "https://www.youtube.com/oembed?url=" + encodeURIComponent(raw) + "&format=json";
-            }
-            if (!ep) {
-              hint.textContent = "That host needs a manual touch — fill title/artist below and Add.";
-              return;
-            }
-            const r = await fetch(ep);
-            if (!r.ok) throw new Error("oembed " + r.status);
-            const d = await r.json();
-            if (d.title) $("fTitle").value = String(d.title).slice(0, 120);
-            if (d.author_name && !$("fArtist").value) $("fArtist").value = String(d.author_name).slice(0, 120);
-            if (d.thumbnail_url) {
-              try {
-                const th = new URL(d.thumbnail_url);
-                if (th.protocol === "https:") $("fArt").value = d.thumbnail_url;
-              } catch { /* ignore */ }
-            }
-            $("fLink").value = raw.slice(0, 300);
-            hint.textContent = "Imported — check the fields, then Add to shelf.";
-          } catch {
-            hint.textContent = "Could not resolve that link — fill the fields manually.";
-          }
-        });
-
-        // Example shelf (labeled demo data, one click to preview sharing).
-        const triggerExample = (e) => {
-          if (e) e.preventDefault();
-          const demo = [
-            { t: "Ghost", a: "Justin Bieber", al: "", art: "", u: "https://open.spotify.com/track/6I3mqTwhRpn34SLVafSH7G" },
-            { t: "Blinding Lights", a: "The Weeknd", al: "After Hours", art: "", u: "" },
-          ];
-          location.hash = "#p=" + btoa(unescape(encodeURIComponent(JSON.stringify(demo))))
-            .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-          location.reload();
-        };
-        $("exampleShelf").addEventListener("click", triggerExample);
-        const emptyBtn = $("emptyExampleBtn");
-        if (emptyBtn) emptyBtn.addEventListener("click", triggerExample);
-        // Marquee: service names scrolling under the hero.
         const mt = document.getElementById("marqueeTrack");
         if (mt) {
-          const names = ["Spotify", "Apple Music", "YouTube Music", "YouTube", "SoundCloud", "Deezer"];
-          const seq = names.map((n) => n + "  · ").join("");
+          const seq = ["Spotify", "Apple Music", "YouTube Music", "YouTube", "SoundCloud", "Deezer"].map((n) => n + "  \u00b7 ").join("");
           mt.textContent = (seq + seq).repeat(2);
         }
-
-        // Bridge for the optional cloud module (auth/sync/discover).
-        window.FavShelf = { loadShelf, saveShelf, render, songPageUrl, cleanStr, safeHttps, cardEl };
+        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          for (const card of document.querySelectorAll(".hero-card")) {
+            card.addEventListener("pointermove", (e) => {
+              if (e.pointerType === "touch") return;
+              const r = card.getBoundingClientRect();
+              const x = (e.clientX - r.left) / r.width - 0.5;
+              const y = (e.clientY - r.top) / r.height - 0.5;
+              card.style.transform = "perspective(700px) rotateX(" + (-y * 10).toFixed(2) + "deg) rotateY(" + (x * 12).toFixed(2) + "deg)";
+            });
+            card.addEventListener("pointerleave", () => { card.style.transform = ""; });
+          }
+        }
       })();
     </script>
+
+    <script src="supabase-config.js" onerror="this.remove()"></script>
+
+
   </body>
 </html>

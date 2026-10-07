@@ -8,8 +8,14 @@ One-time setup (owner does this in the dashboards; nothing here is secret):
    Verifies: `shelves` + `shelf_songs` tables, RLS on, 4 policies.
 3. **Google auth** — Authentication → Providers → Google → ON.
    Needs a Google OAuth client: https://console.cloud.google.com/apis/credentials
-   → Create OAuth client ID (Web) → authorized redirect URI from the
-   Supabase Google provider page → paste client ID + secret back.
+   → Create OAuth client ID (Web application):
+   - Authorized JavaScript origins: your Supabase project URL
+     (Project Settings → API → Project URL).
+   - Authorized redirect URI: copy the **Callback URL** shown on Supabase's
+     Google provider page itself (ends in `/auth/v1/callback`).
+   → paste the Google client ID + client secret into Supabase.
+   ⚠️ The Google client secret lives ONLY in the Supabase dashboard —
+   never in code, git, or chat. Whoever holds it can impersonate logins.
 4. **Redirect URLs** — Authentication → URL Configuration → Redirect URLs:
    - `https://favsongs.pages.dev/`
    - `http://localhost:8124/` (local review only)

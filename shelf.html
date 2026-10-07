@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Your shelf — FavSongs</title>
+    <meta name="description" content="Your FavSongs shelf — save favourites, import from your apps, share with one link." />
+    <link rel="canonical" href="https://favsongs.pages.dev/shelf.html" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ffb020'/%3E%3Cpath d='M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z' fill='%230b0a08'/%3E%3Ccircle cx='23' cy='8.6' r='2' fill='%230b0a08' opacity='.5'/%3E%3C/svg%3E" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      [hidden] { display: none !important; }
+      body.shelf-page { min-height: 100svh; display: flex; flex-direction: column; }
+      main.shelf-main { flex: 1; width: 100%; }
+      .fav-empty .big-note { font-size: 2.2rem; display: block; margin-bottom: 0.6rem; }
+    </style>
+  </head>
+  <body class="shelf-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="fav-top">
+      <a class="fav-brand" href="index.html" aria-label="FavSongs home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#ffb020"/><path d="M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z" fill="#0b0a08"/><circle cx="23" cy="8.6" r="2" fill="#0b0a08" opacity=".5"/></svg>
+        FavSongs
+      </a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
+      <a class="btn btn-sm" href="index.html#discover" style="text-decoration:none">Discover</a>
+      <span id="authArea"></span>
+    </header>
+    <main id="main" class="shelf-main">
+<div class="shared-banner" id="sharedBanner" hidden>
+        <div><b id="sharedTitle">Someone shared their shelf with you</b><span id="sharedSub"></span></div>
+        <div class="fav-actions">
+          <button class="btn btn-primary btn-sm" id="saveAllBtn" type="button">Save all to my shelf</button>
+          <button class="btn btn-sm" id="dismissSharedBtn" type="button">Dismiss</button>
+        </div>
+      <section class="fav-sec" id="shelf">
+        <div class="fav-sec-head">
+          <h2 id="shelfTitle">Your shelf</h2>
+          <p id="shelfMeta"></p>
+        </div>
+        <div class="shelf-grid" id="shelfGrid"></div>
+        <div class="fav-empty" id="shelfEmpty" hidden>
+          <span class="big-note" aria-hidden="true">♪</span>
+          <b>Your shelf is waiting for its first track</b>
+          <p>Add one below, import a link, or peek at an example shelf to see how sharing looks.</p>
+          <div class="row">
+            <button class="btn btn-primary btn-sm" id="emptyExampleBtn" type="button">See an example shelf</button>
+          </div>
+        </div>
+        <div class="fav-actions" id="shareRow" hidden style="margin-top:1rem">
+          <button class="btn btn-primary" id="shareBtn" type="button">Copy share link</button>
+          <span class="fav-hint" id="shareHint">Anyone opening it sees this shelf.</span>
+          <label class="fav-hint" id="publicWrap" hidden style="display:inline-flex;align-items:center;gap:0.4rem;cursor:pointer">
+            <input type="checkbox" id="publicToggle" /> Public shelf
+          </label>
+          <button class="btn btn-sm" id="syncBtn" type="button" hidden>Sync now</button>
+        </div>
+
+        <div class="fav-add" id="addBox">
+          <h3>Add a song</h3>
+          <div class="fav-row">
+            <label>Title<input id="fTitle" maxlength="120" placeholder="Blinding Lights" autocomplete="off" /></label>
+            <label>Artist<input id="fArtist" maxlength="120" placeholder="The Weeknd" autocomplete="off" /></label>
+          </div>
+          <div class="fav-row">
+            <label>Link (optional)<input id="fLink" placeholder="https://open.spotify.com/track/…" spellcheck="false" autocomplete="off" /></label>
+            <label>Artwork URL (optional)<input id="fArt" placeholder="https://… .jpg" spellcheck="false" autocomplete="off" /></label>
+          </div>
+          <div class="fav-actions">
+            <button class="btn btn-primary" id="addBtn" type="button">Add to shelf</button>
+          </div>
+          <div class="fav-import">
+            <input id="importLink" placeholder="Paste a Spotify / YouTube track link to import…" spellcheck="false" autocomplete="off" />
+            <button class="btn" id="importBtn" type="button">Import</button>
+            <span class="fav-hint" id="importHint">Spotify + YouTube links auto-fill title, artist and art. Apple Music links need a manual touch.</span>
+          </div>
+        </div>
+      </section>
+    </main>
+      <footer class="fav-foot">
+        <div class="fav-foot-grid">
+          <div>
+            <b>FavSongs</b>
+            <p>Shareable music shelves. Your songs live in your browser — links carry everything.</p>
+          </div>
+          <nav aria-label="Product">
+            <b>Product</b>
+            <a href="#shelf">Your shelf</a>
+            <a href="song.html">Sample song</a>
+          </nav>
+          <nav aria-label="Legal">
+            <b>Legal</b>
+            <a href="legal.html#privacy">Privacy Policy</a>
+            <a href="legal.html#terms">Terms of Use</a>
+            <a href="legal.html#license">License</a>
+            <a href="legal.html#contact">Contact</a>
+          </nav>
+        </div>
+        <p class="fav-copy">© 2026 FavSongs — shelves live in your browser, nothing is uploaded.</p>
+      </footer>
+    <script src="site.js"></script>
+    <script src="supabase-config.js" onerror="this.remove()"></script>
+    <script src="shelf.js"></script>
+    <script type="module" src="cloud.js"></script>
+  </body>
+</html>
