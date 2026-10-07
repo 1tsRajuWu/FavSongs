@@ -43,12 +43,14 @@
     </header>
     <main id="main" class="explore-main">
       <div class="explore-hero">
+        <p class="fav-eyebrow"><i></i> Charts · Search · No sign-up</p>
         <h1>Find <em>anything.</em></h1>
-        <p>Live search across Apple Music and Deezer, plus the charts everyone's playing.</p>
-        <div class="searchbar" role="search">
+        <div class="searchbar searchbar-big" role="search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           <input id="q" placeholder="Song or artist — try Ghost…" autocomplete="off" maxlength="120" />
           <button class="btn btn-primary" id="go" type="button">Search</button>
         </div>
+        <p class="explore-sub">Live across Apple Music + Deezer · US, India &amp; consensus charts below</p>
       </div>
 
       <section class="rail-sec" id="resultsSec" hidden>
@@ -69,6 +71,12 @@
         <div class="rail" id="deezerRail"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
       </section>
 
+      <section class="rail-sec">
+        <h2>Top consensus</h2>
+        <p>US + India fused — common hits float up</p>
+        <div class="rail" id="comboRail"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      </section>
+
       <footer class="fav-foot" style="border:none">
         <div class="fav-foot-grid">
           <div><b>FavSongs</b><p>Shareable music shelves.</p></div>
@@ -80,6 +88,7 @@
     <script src="site.js"></script>
     <script src="supabase-config.js" onerror="this.remove()"></script>
     <script type="module" src="cloud.js"></script>
+    <script src="charts.js"></script>
     <script>
       (() => {
         "use strict";
@@ -94,7 +103,7 @@
         }
         function card(s, src) {
           const a = document.createElement("a");
-          a.className = "song-card";
+          a.className = "song-card pop-in";
           a.href = songHref(s);
           a.style.minWidth = "0";
           const img = document.createElement("img");
@@ -174,35 +183,33 @@
           if (e.key === "Enter") $("go").click();
         });
 
-        // Trending rails (independent — one failing must not block the other).
-        fetch("https://itunes.apple.com/us/rss/topsongs/limit=10/json")
-          .then((r) => (r.ok ? r.json() : null))
-          .then((d) => {
-            const items = ((d && d.feed && d.feed.entry) || []).map((e) => ({
-              item: {
-                t: (e["im:name"] && e["im:name"].label) || "",
-                a: (e["im:artist"] && e["im:artist"].label) || "",
-                art: (((e["im:image"] || []).pop() || {}).label || "").replace("170x170bb", "300x300bb"),
-              },
-              src: "Apple",
-            })).filter((x) => x.item.t);
-            fill($("appleRail"), items);
-          })
-          .catch(() => fill($("appleRail"), []));
-        fetch("https://itunes.apple.com/in/rss/topsongs/limit=10/json")
-          .then((r) => (r.ok ? r.json() : null))
-          .then((d) => {
-            const items = ((d && d.feed && d.feed.entry) || []).map((e) => ({
-              item: {
-                t: (e["im:name"] && e["im:name"].label) || "",
-                a: (e["im:artist"] && e["im:artist"].label) || "",
-                art: (((e["im:image"] || []).pop() || {}).label || "").replace("170x170bb", "300x300bb"),
-              },
-              src: "Apple",
-            })).filter((x) => x.item.t);
-            fill($("deezerRail"), items);
-          })
-          .catch(() => fill($("deezerRail"), []));
+        // Trending rails via shared chart module (filtered + cached).
+        function paintRail(id, items) {
+          const rail = $(id);
+          rail.innerHTML = "";
+          if (!items.length) {
+            rail.innerHTML = "<p class='fav-hint'>Chart unavailable right now.</p>";
+            return;
+          }
+          items.forEach((it, i) => {
+            const c = card({ item: it, src: "Charts" });
+            c.style.animationDelay = (i * 0.06).toFixed(2) + "s";
+            rail.appendChild(c);
+          });
+        }
+        if (window.FavCharts) {
+          window.FavCharts.fetchAppleChart("us").then((items) => paintRail("appleRail", items)).catch(() => paintRail("appleRail", []));
+          window.FavCharts.fetchAppleChart("in").then((items) => paintRail("deezerRail", items)).catch(() => paintRail("deezerRail", []));
+          Promise.all([
+            window.FavCharts.fetchAppleChart("us").catch(() => []),
+            window.FavCharts.fetchAppleChart("in").catch(() => []),
+            window.FavCharts.fetchDeezerChart().catch(() => []),
+          ]).then(([us, inn, dz]) => {
+            paintRail("comboRail", window.FavCharts.mergeCharts([us, inn, dz], 12));
+          }).catch(() => paintRail("comboRail", []));
+        } else {
+          for (const id of ["appleRail", "deezerRail", "comboRail"]) paintRail(id, []);
+        }
       })();
     </script>
   </body>

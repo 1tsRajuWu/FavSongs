@@ -426,6 +426,7 @@
       <div class="orb orb-b" aria-hidden="true"></div>
 
       <section class="song-hero" id="songHero" hidden>
+        <div class="song-main">
         <img class="song-art" id="songArt" alt="Song artwork" />
         <div class="song-meta">
           <p class="song-eyebrow"><span class="pulse"></span> Shared via FavSongs</p>
@@ -449,6 +450,11 @@
 
         <span class="song-direct" id="songDirect"></span>
         <span id="likeMount" style="display:inline-flex;margin-left:0.6rem;vertical-align:middle"></span>
+        </div>
+        <aside class="lyrics" id="lyricsCard" hidden aria-label="Lyrics">
+          <div class="lyrics-head"><h2>Lyrics</h2><span id="lyricsSrc">via lyrics.ovh</span></div>
+          <div class="lyrics-body" id="lyricsBody"><div class="player-loading"></div></div>
+        </aside>
       </section>
 
       <section id="svcSection" hidden>
@@ -647,6 +653,37 @@
         document.getElementById("songHero").hidden = false;
         document.getElementById("svcSection").hidden = false;
         document.getElementById("songFoot").hidden = false;
+
+        // Lyrics side panel (lyrics.ovh, keyless). Independent of lookups.
+        const lyricsCard = document.getElementById("lyricsCard");
+        const lyricsBody = document.getElementById("lyricsBody");
+        lyricsCard.hidden = false;
+        if (artist) {
+          fetch(
+            "https://api.lyrics.ovh/v1/" + encodeURIComponent(artist) + "/" + encodeURIComponent(title),
+          )
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+              const text = d && typeof d.lyrics === "string" ? d.lyrics.trim() : "";
+              if (!text) throw new Error("no lyrics");
+              lyricsBody.textContent = text;
+            })
+            .catch(() => {
+              lyricsBody.innerHTML = "";
+              const note = document.createElement("p");
+              note.style.color = "var(--ink-faint)";
+              note.style.fontSize = "0.9rem";
+              note.textContent = "Lyrics aren't available for this track yet — try it on your music app.";
+              lyricsBody.appendChild(note);
+            });
+        } else {
+          lyricsBody.innerHTML = "";
+          const note = document.createElement("p");
+          note.style.color = "var(--ink-faint)";
+          note.style.fontSize = "0.9rem";
+          note.textContent = "No artist attached, so lyrics can't be looked up.";
+          lyricsBody.appendChild(note);
+        }
 
         // --- Availability: gray out what isn't there ---
         // Apple Music is verified exactly via iTunes; the saved direct link

@@ -63,8 +63,8 @@
 
       <section class="fav-sec" id="trending">
         <div class="fav-sec-head">
-          <h2>Trending now</h2>
-          <p><a href="explore.html" style="color:var(--ink-dim)">Full charts + search →</a></p>
+          <h2>Trending near you</h2>
+          <p class="rail-sub">Detecting your country…</p>
         </div>
         <div class="rail" id="trendingRail"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
       </section>
@@ -93,6 +93,7 @@
     </main>
 
     <script src="site.js"></script>
+    <script src="charts.js"></script>
     <script>
       (() => {
         "use strict";
@@ -101,47 +102,45 @@
           const seq = ["Spotify", "Apple Music", "YouTube Music", "YouTube", "SoundCloud", "Deezer"].map((n) => n + "  \u00b7 ").join("");
           mt.textContent = (seq + seq).repeat(2);
         }
-        // Trending rail (Apple Music India chart) — silent when offline.
+        // Trending rail: YOUR country's chart fused across Apple + Deezer.
         const rail = document.getElementById("trendingRail");
-        if (rail) {
-          fetch("https://itunes.apple.com/in/rss/topsongs/limit=8/json")
-            .then((r) => (r.ok ? r.json() : null))
-            .then((d) => {
-              const rows = (d && d.feed && d.feed.entry) || [];
-              if (!rows.length) throw new Error("empty chart");
+        if (rail && window.FavCharts) {
+          window.FavCharts.detectCountry()
+            .then((cc) => {
+              const label = document.querySelector("#trending .rail-sub");
+              if (label) label.textContent = "Combined Apple Music + Deezer · " + cc.toUpperCase();
+              return window.FavCharts.combinedTrending(cc);
+            })
+            .then((items) => {
+              if (!items.length) throw new Error("empty chart");
               rail.innerHTML = "";
-              for (const e of rows) {
-                const t = (e["im:name"] && e["im:name"].label) || "";
-                const a = (e["im:artist"] && e["im:artist"].label) || "";
-                if (!t) continue;
-                const imgs = e["im:image"] || [];
-                const art = ((imgs[imgs.length - 1] || {}).label || "").replace("170x170bb", "300x300bb");
+              items.forEach((it, i) => {
                 const p = new URLSearchParams();
-                p.set("t", t);
-                if (a) p.set("a", a);
+                p.set("t", it.t);
+                if (it.a) p.set("a", it.a);
                 const link = document.createElement("a");
-                link.className = "song-card";
+                link.className = "song-card pop-in";
+                link.style.animationDelay = (i * 0.07).toFixed(2) + "s";
                 link.href = "song.html?" + p.toString();
                 const img = document.createElement("img");
                 img.alt = "";
                 img.loading = "lazy";
                 img.width = 56;
                 img.height = 56;
-                img.src = art || "icon.svg";
+                img.src = it.art || "icon.svg";
                 img.onerror = () => { img.onerror = null; img.src = "icon.svg"; };
                 const text = document.createElement("div");
                 text.className = "t";
                 const b = document.createElement("b");
-                b.textContent = t;
+                b.textContent = it.t;
                 const sp = document.createElement("span");
-                sp.textContent = a || "Trending";
+                sp.textContent = it.a || "Trending";
                 text.appendChild(b);
                 text.appendChild(sp);
                 link.appendChild(img);
                 link.appendChild(text);
                 rail.appendChild(link);
-              }
-              if (!rail.children.length) throw new Error("empty chart");
+              });
             })
             .catch(() => {
               const sec = rail.closest("section");
