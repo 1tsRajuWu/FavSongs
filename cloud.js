@@ -67,8 +67,25 @@ if (!configured) {
     return true;
   }
 
-  sb.auth.onAuthStateChange(() => location.reload());
+  // Reload only on real transitions — INITIAL_SESSION also fires here,
+  // so a blind reload would loop forever.
+  let bootedUid = null;
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_OUT") {
+      bootedUid = null;
+      const syncB = document.getElementById("syncBtn");
+      if (syncB) syncB.hidden = true;
+      const pwrap = document.getElementById("publicWrap");
+      if (pwrap) pwrap.hidden = true;
+      bootSession(null);
+    } else if (event === "SIGNED_IN" && session) {
+      bootSession(session);
+    }
+  });
   sb.auth.getSession().then(async ({ data: { session } }) => {
+    bootSession(session);
+  });
+  async function bootSession(session) {
     if (!session) {
       authBtn("Sign in with Google", () => {
         sb.auth.signInWithOAuth({
@@ -79,6 +96,8 @@ if (!configured) {
       loadDiscover();
       return;
     }
+    if (bootedUid === session.user.id) return;
+    bootedUid = session.user.id;
     const meta = session.user.user_metadata || {};
     const name = meta.full_name || meta.name || session.user.email || "you";
     const avatar = meta.avatar_url || meta.picture || "";
@@ -138,7 +157,7 @@ if (!configured) {
         loadDiscover();
       });
     }
-  });
+  }
 
   async function loadDiscover() {
     try {
