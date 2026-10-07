@@ -1,0 +1,50 @@
+name: Deploy FavSongs site (Cloudflare Pages)
+
+# Deploys this repo to the favsongs Pages project on every push to main
+# that touches the site. Manual runs via workflow_dispatch.
+#
+# One-time setup (repo Settings → Secrets and variables → Actions):
+#   CLOUDFLARE_API_TOKEN  — API token with "Cloudflare Pages: Edit" permission
+#   CLOUDFLARE_ACCOUNT_ID — account ID (dash.cloudflare.com sidebar)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'song.html'
+      - 'legal.html'
+      - 'styles.css'
+      - 'site.js'
+      - 'icon.svg'
+      - 'robots.txt'
+      - '_headers'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: favsongs-site
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Direct-upload deploys default to a preview branch — pin the
+          # production branch so favsongs.pages.dev actually updates.
+          command: pages deploy . --project-name favsongs --branch main
