@@ -2089,3 +2089,27 @@ footer.site {
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .made-with a:hover { color: var(--ink); }
+
+/* Viewer mode (shared-link openers): wordmark only in the header. */
+body.viewer .fav-nav,
+body.viewer [data-theme-toggle],
+body.viewer #authArea,
+body.viewer .fav-top .btn {
+  display: none;
+}
+/* Featured mini preview player */
+.mini-play {
+  width: 44px; height: 44px; border-radius: 50%; border: none; cursor: pointer;
+  display: inline-grid; place-items: center; flex: none;
+  background: linear-gradient(135deg, var(--amber), var(--amber-deep));
+  color: #0b0a08; font-size: 15px;
+  box-shadow: 0 8px 26px var(--glow-amber);
+  transition: transform 0.2s var(--ease);
+  margin-top: 0.8rem;
+}
+.mini-play:hover { transform: scale(1.07); }
+.mini-play:active { transform: scale(0.96); }
+.mini-play.on { animation: minipulse 1.6s ease-in-out infinite; }
+@keyframes minipulse { 50% { box-shadow: 0 0 0 10px transparent, 0 8px 26px var(--glow-amber); } 0%,100% { box-shadow: 0 0 0 0 var(--glow-amber), 0 8px 26px var(--glow-amber); } }
+.mini-play.unavail { opacity: 0.35; cursor: default; }
+.featured .go + .mini-play { margin-left: 0.6rem; }

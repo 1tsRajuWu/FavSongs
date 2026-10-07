@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Shared shelf — FavSongs</title>
+    <meta name="description" content="Someone shared their favourite music with you on FavSongs." />
+    <link rel="canonical" href="https://favsongs.pages.dev/shelf.html" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ffb020'/%3E%3Cpath d='M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z' fill='%230b0a08'/%3E%3Ccircle cx='23' cy='8.6' r='2' fill='%230b0a08' opacity='.5'/%3E%3C/svg%3E" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      [hidden] { display: none !important; }
+      body.shelf-page { min-height: 100svh; display: flex; flex-direction: column; }
+      main.shelf-main { flex: 1; width: 100%; }
+      /* Viewer mode: wordmark only — the link is about their songs. */
+      body.viewer .fav-nav,
+      body.viewer [data-theme-toggle],
+      body.viewer #authArea,
+      body.viewer .fav-top .btn {
+        display: none;
+      }
+      .s-error { text-align: center; padding: 5rem var(--rail); color: var(--ink-dim); }
+      .s-error h1 { color: var(--ink); }
+    </style>
+  </head>
+  <body class="shelf-page viewer">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="fav-top">
+      <div class="fav-top-inner">
+        <a class="fav-brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+        <nav class="fav-nav" aria-label="Primary">
+          <a href="shelf.html">My shelf</a>
+          <a href="index.html#discover">Discover</a>
+          <a href="song.html">Sample song</a>
+        </nav>
+        <div class="fav-top-spot">
+          <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
+          <span id="authArea"></span>
+        </div>
+      </div>
+    </header>
+    <main id="main" class="shelf-main">
+      <div class="share-actions" id="sharedBar" hidden>
+        <span class="share-note" id="sharedNote"></span>
+        <span class="share-btns">
+          <button class="btn btn-primary btn-sm" id="saveAllBtn" type="button">Save all</button>
+        </span>
+      </div>
+      <section class="fav-sec" id="shelf">
+        <div class="fav-sec-head">
+          <h2 id="shelfTitle">Shared shelf</h2>
+          <p id="shelfMeta"></p>
+        </div>
+        <div id="playlistWrap" hidden>
+          <a class="featured featured-big" id="featuredCard" href="#">
+            <img id="featuredArt" alt="" />
+            <span class="featured-meta">
+              <span class="kicker">Pinned favourite</span>
+              <b id="featuredTitle"></b>
+              <span id="featuredSub"></span>
+              <span class="go"><i>▶</i> Open song page</span>
+            </span>
+          </a>
+          <div class="playlist" id="playlistRows"></div>
+          <p class="made-with">Created with <a href="index.html"><b>Fav<em>Songs</em></b></a></p>
+        </div>
+      </section>
+      <div class="s-error" id="linkError" hidden>
+        <h1>Link not found</h1>
+        <p>This shelf link is invalid or was removed.</p>
+        <p><a class="btn btn-primary" href="index.html">Make your own shelf</a></p>
+      </div>
+    </main>
+    <script src="site.js"></script>
+    <script src="supabase-config.js" onerror="this.remove()"></script>
+    <script src="shared.js"></script>
+    <script>
+      (() => {
+        "use strict";
+        const id = new URLSearchParams(location.search).get("id") || "";
+        if (!/^[A-Za-z0-9_-]{6,12}$/.test(id)) {
+          document.getElementById("linkError").hidden = false;
+          return;
+        }
+        const SUPA_URL = window.FAVSONGS_SUPABASE_URL || "";
+        const SUPA_KEY = window.FAVSONGS_SUPABASE_ANON_KEY || "";
+        if (!SUPA_URL.startsWith("https://") || SUPA_KEY.length < 20) {
+          // Backend not wired yet — explain instead of spinning.
+          const err = document.getElementById("linkError");
+          err.querySelector("h1").textContent = "Sharing is still starting up";
+          err.querySelector("p").textContent = "Short links activate once cloud sync is configured. Try again soon.";
+          err.hidden = false;
+          return;
+        }
+        fetch(SUPA_URL + "/rest/v1/shared_links?id=eq." + encodeURIComponent(id) + "&select=songs", {
+          headers: { apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY },
+        })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((rows) => {
+            const songs = rows && rows[0] && Array.isArray(rows[0].songs) ? rows[0].songs : [];
+            const clean = songs
+              .filter((s) => s && typeof s.t === "string" && s.t.trim())
+              .slice(0, 24)
+              .map((s) => ({
+                t: String(s.t).slice(0, 120),
+                a: String(s.a || "").slice(0, 120),
+                al: String(s.al || "").slice(0, 120),
+                art: /^https:\/\//.test(s.art || "") ? s.art : "",
+                u: /^https:\/\//.test(s.u || "") ? s.u : "",
+              }));
+            if (!clean.length) throw new Error("empty");
+            document.getElementById("sharedBar").hidden = false;
+            document.getElementById("sharedNote").textContent =
+              clean.length + " song" + (clean.length > 1 ? "s" : "") + " shared with you — save them or just press play.";
+            document.getElementById("shelfMeta").textContent = clean.length + " songs";
+            document.getElementById("playlistWrap").hidden = false;
+            window.SharedList.renderPlaylist(
+              {
+                featuredCard: document.getElementById("featuredCard"),
+                featuredArt: document.getElementById("featuredArt"),
+                featuredTitle: document.getElementById("featuredTitle"),
+                featuredSub: document.getElementById("featuredSub"),
+                rowsEl: document.getElementById("playlistRows"),
+              },
+              clean,
+              { playable: true },
+            );
+            document.getElementById("saveAllBtn").addEventListener("click", () => {
+              try {
+                const raw = localStorage.getItem("favsongs.shelf.v1");
+                const mine = raw ? JSON.parse(raw) : [];
+                const have = new Set(mine.map((o) => ((o.t || "") + "|||" + (o.a || "")).toLowerCase()));
+                for (const s of clean) {
+                  if (!have.has(((s.t || "") + "|||" + (s.a || "")).toLowerCase())) {
+                    mine.push({ ...s, id: "mine-" + Date.now() + "-" + Math.floor(Math.random() * 1e6) });
+                  }
+                }
+                localStorage.setItem("favsongs.shelf.v1", JSON.stringify(mine));
+              } catch { /* private mode */ }
+              location.href = "shelf.html";
+            });
+            // Best-effort view counter skipped: anon has no update lane
+            // by design (insert + select only).
+          })
+          .catch(() => {
+            document.getElementById("linkError").hidden = false;
+          });
+      })();
+    </script>
+  </body>
+</html>

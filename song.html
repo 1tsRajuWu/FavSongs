@@ -267,6 +267,18 @@
         color: var(--ink-faint);
         animation: rise 0.6s var(--ease) 0.2s both;
       }
+      .svc.unavail { opacity: 0.42; }
+      .svc.unavail:hover { transform: none; }
+      .svc .na-tag {
+        margin-left: auto; font-size: 0.68rem; font-weight: 700;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--ink-faint); border: 1px solid var(--line);
+        padding: 0.15rem 0.5rem; border-radius: 999px; flex: none;
+      }
+      .verify-note {
+        max-width: 860px; width: 100%; margin: 0.4rem auto 0; padding: 0;
+        color: var(--ink-faint); font-size: 0.85rem; text-align: center;
+      }
       .svc-grid {
         position: relative;
         display: grid;
@@ -569,13 +581,16 @@
         }
 
         // Saved direct link (e.g. the exact Spotify track) gets top billing.
+        // Its service counts as verified-present no matter what lookups say.
         const directWrap = document.getElementById("songDirect");
+        let directService = "";
         if (/^https:\/\/[^"'<>\s]+$/i.test(direct)) {
           let featured = null;
           try {
             const host = new URL(direct).hostname.toLowerCase().replace(/^www\./, "");
             featured = SERVICES.find((s) => host === s.host || host.endsWith("." + s.host)) || null;
           } catch { /* ignore malformed URL */ }
+          if (featured) directService = featured.name;
           const btn = document.createElement("a");
           btn.className = "btn btn-primary";
           btn.href = direct;
@@ -591,6 +606,7 @@
           link.className = "svc";
           link.href = s.url;
           link.rel = "noopener";
+          link.dataset.svc = s.name;
           link.style.setProperty("--svc", s.color);
           link.style.setProperty("--svc-glow", s.color + "55");
           link.style.setProperty("--svc-tint", s.color + "22");
@@ -615,6 +631,43 @@
         document.getElementById("songHero").hidden = false;
         document.getElementById("svcSection").hidden = false;
         document.getElementById("songFoot").hidden = false;
+
+        // --- Availability: gray out what isn't there ---
+        // Apple Music is verified exactly via iTunes; the saved direct link
+        // verifies its own service. Anything else is an honest live search.
+        function normStr(s) {
+          return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        }
+        function markUnavailable(name) {
+          const link = grid.querySelector('[data-svc="' + name + '"]');
+          if (!link || link.classList.contains("unavail")) return;
+          link.classList.add("unavail");
+          link.setAttribute("aria-disabled", "true");
+          const tag = document.createElement("span");
+          tag.className = "na-tag";
+          tag.textContent = "Not here";
+          link.appendChild(tag);
+        }
+        function applyAvailability(hit) {
+          if (!hit) {
+            // Nothing matched anywhere — every search is best-effort.
+            for (const s of SERVICES) {
+              if (s.name !== directService) markUnavailable(s.name);
+            }
+            const note = document.createElement("p");
+            note.className = "verify-note";
+            note.textContent =
+              "Couldn't verify this track on any service — links below are best-effort searches.";
+            grid.after(note);
+            return;
+          }
+          const exact =
+            normStr(hit.trackName).includes(normStr(title).slice(0, 12)) &&
+            (!artist || normStr(hit.artistName).includes(normStr(artist).slice(0, 8)) ||
+              normStr(artist).includes(normStr(hit.artistName).slice(0, 8)));
+          // iTunes IS Apple Music: no exact match means not there.
+          if (!exact && directService !== "Apple Music") markUnavailable("Apple Music");
+        }
 
         // --- Playable 30s preview via iTunes Search (no key needed) ---
         const playerEl = document.getElementById("player");
@@ -650,15 +703,18 @@
             data && data.resultCount > 0 ? data : itunes(encodeURIComponent(title)),
           )
           .then((data) => {
-            const hit = data && data.results && data.results[0];
-            const preview = hit && hit.previewUrl;
-            if (!preview) throw new Error("no preview");
+            const hit = (data && data.results && data.results[0]) || null;
+            applyAvailability(hit);
+            if (!hit || !hit.previewUrl) {
+              loadingEl.hidden = true; // verified (or not) — grid still works
+              return;
+            }
             // Prefer high-res iTunes art when the link gave us nothing usable.
             const itunesArt = hit.artworkUrl100
               ? String(hit.artworkUrl100).replace("100x100bb", "600x600bb")
               : "";
             if (!safeArt && itunesArt) setCover(itunesArt);
-            audio.src = preview;
+            audio.src = hit.previewUrl;
             audio.addEventListener("timeupdate", () => {
               const d = audio.duration || 30;
               trackFill.style.width = ((audio.currentTime / d) * 100).toFixed(1) + "%";
@@ -673,6 +729,7 @@
           })
           .catch(() => {
             loadingEl.hidden = true; // no preview — services grid still works
+            applyAvailability(null);
           });
 
         playBtn.addEventListener("click", () => {
