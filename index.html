@@ -18,6 +18,7 @@
         <nav class="fav-nav" aria-label="Primary">
           <a href="shelf.html">My shelf</a>
           <a href="index.html#discover">Discover</a>
+          <a href="explore.html">Explore</a>
           <a href="song.html">Sample song</a>
         </nav>
         <div class="fav-top-spot">
@@ -54,10 +55,18 @@
 
       <section class="fav-sec" id="discover" hidden>
         <div class="fav-sec-head">
-          <h2>Fresh shelves</h2>
-          <p id="discoverMeta">from people who made theirs public</p>
+          <h2>People's favourites</h2>
+          <p id="discoverMeta">shelves people made public — open one, save what you love</p>
         </div>
         <div class="shelf-grid" id="discoverGrid"></div>
+      </section>
+
+      <section class="fav-sec" id="trending">
+        <div class="fav-sec-head">
+          <h2>Trending now</h2>
+          <p><a href="explore.html" style="color:var(--ink-dim)">Full charts + search →</a></p>
+        </div>
+        <div class="rail" id="trendingRail"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
       </section>
 
       <footer class="fav-foot">
@@ -91,6 +100,53 @@
         if (mt) {
           const seq = ["Spotify", "Apple Music", "YouTube Music", "YouTube", "SoundCloud", "Deezer"].map((n) => n + "  \u00b7 ").join("");
           mt.textContent = (seq + seq).repeat(2);
+        }
+        // Trending rail (Apple Music India chart) — silent when offline.
+        const rail = document.getElementById("trendingRail");
+        if (rail) {
+          fetch("https://itunes.apple.com/in/rss/topsongs/limit=8/json")
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+              const rows = (d && d.feed && d.feed.entry) || [];
+              if (!rows.length) throw new Error("empty chart");
+              rail.innerHTML = "";
+              for (const e of rows) {
+                const t = (e["im:name"] && e["im:name"].label) || "";
+                const a = (e["im:artist"] && e["im:artist"].label) || "";
+                if (!t) continue;
+                const imgs = e["im:image"] || [];
+                const art = ((imgs[imgs.length - 1] || {}).label || "").replace("170x170bb", "300x300bb");
+                const p = new URLSearchParams();
+                p.set("t", t);
+                if (a) p.set("a", a);
+                const link = document.createElement("a");
+                link.className = "song-card";
+                link.href = "song.html?" + p.toString();
+                const img = document.createElement("img");
+                img.alt = "";
+                img.loading = "lazy";
+                img.width = 56;
+                img.height = 56;
+                img.src = art || "icon.svg";
+                img.onerror = () => { img.onerror = null; img.src = "icon.svg"; };
+                const text = document.createElement("div");
+                text.className = "t";
+                const b = document.createElement("b");
+                b.textContent = t;
+                const sp = document.createElement("span");
+                sp.textContent = a || "Trending";
+                text.appendChild(b);
+                text.appendChild(sp);
+                link.appendChild(img);
+                link.appendChild(text);
+                rail.appendChild(link);
+              }
+              if (!rail.children.length) throw new Error("empty chart");
+            })
+            .catch(() => {
+              const sec = rail.closest("section");
+              if (sec) sec.hidden = true;
+            });
         }
         if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
           for (const card of document.querySelectorAll(".hero-card")) {

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Explore — FavSongs</title>
+    <meta name="description" content="Search every song and browse what's trending, powered by Apple Music and Deezer charts." />
+    <link rel="canonical" href="https://favsongs.pages.dev/explore.html" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ffb020'/%3E%3Cpath d='M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z' fill='%230b0a08'/%3E%3Ccircle cx='23' cy='8.6' r='2' fill='%230b0a08' opacity='.5'/%3E%3C/svg%3E" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      [hidden] { display: none !important; }
+      body.explore-page { min-height: 100svh; display: flex; flex-direction: column; }
+      main.explore-main { flex: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 2rem var(--rail); }
+      .explore-hero h1 { font-size: clamp(2rem, 4.5vw, 3rem); letter-spacing: -0.025em; margin: 0 0 0.5rem; }
+      .explore-hero h1 em { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; background: linear-gradient(120deg, var(--amber), var(--coral)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+      .explore-hero p { color: var(--ink-dim); margin: 0 0 1.4rem; }
+      .rail-sec { margin: 2rem 0 0; }
+      .rail-sec h2 { font-size: 1.25rem; margin: 0 0 0.2rem; letter-spacing: -0.01em; }
+      .rail-sec > p { color: var(--ink-faint); font-size: 0.86rem; margin: 0 0 0.8rem; }
+      .skel { border-radius: var(--r); border: 1px solid var(--line); min-height: 210px;
+        background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.04) 75%);
+        background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+      @keyframes shimmer { to { background-position: -200% 0; } }
+      @media (prefers-reduced-motion: reduce) { .skel { animation: none; } }
+    </style>
+  </head>
+  <body class="explore-page">
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="fav-top">
+      <div class="fav-top-inner">
+        <a class="fav-brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+        <nav class="fav-nav" aria-label="Primary">
+          <a href="shelf.html">My shelf</a>
+          <a href="index.html#discover">Discover</a>
+          <a href="explore.html" aria-current="page">Explore</a>
+        </nav>
+        <div class="fav-top-spot">
+          <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
+          <span id="authArea"></span>
+        </div>
+      </div>
+    </header>
+    <main id="main" class="explore-main">
+      <div class="explore-hero">
+        <h1>Find <em>anything.</em></h1>
+        <p>Live search across Apple Music and Deezer, plus the charts everyone's playing.</p>
+        <div class="searchbar" role="search">
+          <input id="q" placeholder="Song or artist — try Ghost…" autocomplete="off" maxlength="120" />
+          <button class="btn btn-primary" id="go" type="button">Search</button>
+        </div>
+      </div>
+
+      <section class="rail-sec" id="resultsSec" hidden>
+        <h2>Results</h2>
+        <p id="resultsMeta"></p>
+        <div class="rail" id="resultsRail"></div>
+      </section>
+
+      <section class="rail-sec">
+        <h2>Trending now</h2>
+        <p>US Top Songs · Apple Music, refreshed hourly</p>
+        <div class="rail" id="appleRail"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      </section>
+
+      <section class="rail-sec">
+        <h2>Trending India</h2>
+        <p>Top songs · Apple Music India, refreshed hourly</p>
+        <div class="rail" id="deezerRail"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      </section>
+
+      <footer class="fav-foot" style="border:none">
+        <div class="fav-foot-grid">
+          <div><b>FavSongs</b><p>Shareable music shelves.</p></div>
+          <nav aria-label="Product"><b>Product</b><a href="shelf.html">Your shelf</a><a href="song.html">Sample song</a></nav>
+          <nav aria-label="Legal"><b>Legal</b><a href="legal.html#privacy">Privacy Policy</a><a href="legal.html#terms">Terms of Use</a></nav>
+        </div>
+      </footer>
+    </main>
+    <script src="site.js"></script>
+    <script src="supabase-config.js" onerror="this.remove()"></script>
+    <script type="module" src="cloud.js"></script>
+    <script>
+      (() => {
+        "use strict";
+        const $ = (id) => document.getElementById(id);
+
+        function songHref(s) {
+          const p = new URLSearchParams();
+          p.set("t", s.t);
+          if (s.a) p.set("a", s.a);
+          if (s.art) p.set("art", s.art);
+          return "song.html?" + p.toString();
+        }
+        function card(s, src) {
+          const a = document.createElement("a");
+          a.className = "song-card";
+          a.href = songHref(s);
+          a.style.minWidth = "0";
+          const img = document.createElement("img");
+          img.alt = "";
+          img.loading = "lazy";
+          img.width = 56;
+          img.height = 56;
+          img.src = s.art || "icon.svg";
+          img.onerror = () => { img.onerror = null; img.src = "icon.svg"; };
+          const t = document.createElement("div");
+          t.className = "t";
+          const b = document.createElement("b");
+          b.textContent = s.t;
+          const sp = document.createElement("span");
+          sp.textContent = (s.a || "Unknown artist") + " · " + src;
+          t.appendChild(b);
+          t.appendChild(sp);
+          a.appendChild(img);
+          a.appendChild(t);
+          return a;
+        }
+        function fill(rail, items) {
+          rail.innerHTML = "";
+          if (!items.length) {
+            rail.innerHTML = "<p class='fav-hint'>Nothing found — try another search.</p>";
+            return;
+          }
+          for (const s of items) rail.appendChild(card(s.item, s.src));
+        }
+
+        async function searchAll(query) {
+          const jobs = [
+            fetch("https://itunes.apple.com/search?term=" + encodeURIComponent(query) + "&media=music&entity=song&limit=12")
+              .then((r) => (r.ok ? r.json() : null))
+              .then((d) => (d && d.results ? d.results : []).map((r) => ({
+                item: {
+                  t: r.trackName || "", a: r.artistName || "",
+                  art: (r.artworkUrl100 || "").replace("100x100bb", "300x300bb"),
+                }, src: "Apple",
+              })))
+              .catch(() => []),
+            fetch("https://api.deezer.com/search?q=" + encodeURIComponent(query) + "&limit=12")
+              .then((r) => (r.ok ? r.json() : null))
+              .then((d) => (d && d.data ? d.data : []).map((r) => ({
+                item: {
+                  t: r.title || "", a: (r.artist && r.artist.name) || "",
+                  art: r.cover_medium || r.cover || "",
+                }, src: "Deezer",
+              })))
+              .catch(() => []),
+          ];
+          const [a, b] = await Promise.all(jobs);
+          const seen = new Set();
+          const out = [];
+          for (const e of [...a, ...b]) {
+            if (!e.item.t) continue;
+            const k = (e.item.t + "|||" + e.item.a).toLowerCase().replace(/[^a-z0-9]/g, "");
+            if (seen.has(k)) continue;
+            seen.add(k);
+            out.push(e);
+          }
+          return out.slice(0, 18);
+        }
+
+        $("go").addEventListener("click", async () => {
+          const qv = $("q").value.trim();
+          if (!qv) return;
+          const sec = $("resultsSec");
+          sec.hidden = false;
+          $("resultsMeta").textContent = "Searching Apple Music + Deezer…";
+          fill($("resultsRail"), []);
+          const items = await searchAll(qv);
+          $("resultsMeta").textContent = items.length + " result" + (items.length === 1 ? "" : "s");
+          fill($("resultsRail"), items);
+        });
+        $("q").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") $("go").click();
+        });
+
+        // Trending rails (independent — one failing must not block the other).
+        fetch("https://itunes.apple.com/us/rss/topsongs/limit=10/json")
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            const items = ((d && d.feed && d.feed.entry) || []).map((e) => ({
+              item: {
+                t: (e["im:name"] && e["im:name"].label) || "",
+                a: (e["im:artist"] && e["im:artist"].label) || "",
+                art: (((e["im:image"] || []).pop() || {}).label || "").replace("170x170bb", "300x300bb"),
+              },
+              src: "Apple",
+            })).filter((x) => x.item.t);
+            fill($("appleRail"), items);
+          })
+          .catch(() => fill($("appleRail"), []));
+        fetch("https://itunes.apple.com/in/rss/topsongs/limit=10/json")
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            const items = ((d && d.feed && d.feed.entry) || []).map((e) => ({
+              item: {
+                t: (e["im:name"] && e["im:name"].label) || "",
+                a: (e["im:artist"] && e["im:artist"].label) || "",
+                art: (((e["im:image"] || []).pop() || {}).label || "").replace("170x170bb", "300x300bb"),
+              },
+              src: "Apple",
+            })).filter((x) => x.item.t);
+            fill($("deezerRail"), items);
+          })
+          .catch(() => fill($("deezerRail"), []));
+      })();
+    </script>
+  </body>
+</html>

@@ -2113,3 +2113,40 @@ body.viewer .fav-top .btn {
 @keyframes minipulse { 50% { box-shadow: 0 0 0 10px transparent, 0 8px 26px var(--glow-amber); } 0%,100% { box-shadow: 0 0 0 0 var(--glow-amber), 0 8px 26px var(--glow-amber); } }
 .mini-play.unavail { opacity: 0.35; cursor: default; }
 .featured .go + .mini-play { margin-left: 0.6rem; }
+
+/* Likes: heart button + count */
+.like-btn {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.5rem 0.85rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line); background: rgba(255,255,255,0.04);
+  color: var(--ink-dim); font-weight: 700; font-size: 0.85rem;
+  transition: transform 0.2s var(--ease), border-color 0.25s var(--ease), color 0.25s var(--ease);
+}
+.like-btn svg { width: 17px; height: 17px; fill: currentColor; }
+.like-btn:hover { transform: translateY(-2px); color: var(--ink); border-color: var(--line-strong); }
+.like-btn:active { transform: scale(0.96); }
+.like-btn.on { color: #ff5c7a; border-color: #ff5c7a; }
+.like-btn.on svg { fill: #ff5c7a; filter: drop-shadow(0 0 8px rgba(255,92,122,0.6)); }
+.like-btn:disabled { opacity: 0.6; cursor: wait; }
+/* Explore rails */
+.rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(150px, 170px); gap: 0.8rem; overflow-x: auto; padding: 0.2rem 0 0.8rem; scroll-snap-type: x mandatory; }
+.rail .song-card { scroll-snap-align: start; }
+.rail-wrap { position: relative; }
+.searchbar { display: flex; gap: 0.6rem; margin: 0 0 1.2rem; flex-wrap: wrap; }
+.searchbar input {
+  flex: 1; min-width: 220px; padding: 0.75rem 1rem; border-radius: 14px;
+  border: 1px solid var(--line); background: rgba(255,255,255,0.04);
+  color: var(--ink); font-size: 0.95rem;
+}
+.searchbar input:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px var(--glow-amber); }
+.src-tag {
+  font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--ink-faint); border: 1px solid var(--line); border-radius: 999px;
+  padding: 0.12rem 0.5rem; margin-left: 0.45rem; vertical-align: 2px; white-space: nowrap;
+}
+/* Trending skeletons */
+.skel { border-radius: var(--r); border: 1px solid var(--line); min-height: 210px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.04) 75%);
+  background-size: 200% 100%; animation: shimmer 1.2s linear infinite; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } }

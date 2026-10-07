@@ -448,6 +448,7 @@
         <div class="player" id="playerLoading" hidden><div class="player-loading"></div></div>
 
         <span class="song-direct" id="songDirect"></span>
+        <span id="likeMount" style="display:inline-flex;margin-left:0.6rem;vertical-align:middle"></span>
       </section>
 
       <section id="svcSection" hidden>
@@ -472,6 +473,21 @@
     </main>
 
     <script src="site.js"></script>
+    <script type="module">
+      import { mountLike, songTargetId } from "./likes.js";
+      try {
+        const q = new URLSearchParams(location.search);
+        const t = (q.get("t") || "").trim();
+        const a = (q.get("a") || "").trim();
+        if (t) {
+          mountLike(document.getElementById("likeMount"), {
+            type: "song",
+            id: songTargetId(t, a),
+          });
+        }
+      } catch { /* likes need backend config; page works without */ }
+    </script>
+
     <script>
       (() => {
         "use strict";
@@ -648,25 +664,32 @@
           tag.textContent = "Not here";
           link.appendChild(tag);
         }
-        function applyAvailability(hit) {
-          if (!hit) {
+        function exactMatch(gotTitle, gotArtist) {
+          return (
+            normStr(gotTitle).includes(normStr(title).slice(0, 12)) &&
+            (!artist ||
+              normStr(gotArtist).includes(normStr(artist).slice(0, 8)) ||
+              normStr(artist).includes(normStr(gotArtist).slice(0, 8)))
+          );
+        }
+        function applyAvailability(hit, dzHit) {
+          const appleOk = !!hit || directService === "Apple Music";
+          const deezerOk = !!dzHit || directService === "Deezer";
+          if (!hit && !dzHit && !directService) {
             // Nothing matched anywhere — every search is best-effort.
-            for (const s of SERVICES) {
-              if (s.name !== directService) markUnavailable(s.name);
-            }
+            for (const s of SERVICES) markUnavailable(s.name);
             const note = document.createElement("p");
             note.className = "verify-note";
             note.textContent =
               "Couldn't verify this track on any service — links below are best-effort searches.";
             grid.after(note);
-            return;
+            return { appleOk: false, deezerOk: false };
           }
-          const exact =
-            normStr(hit.trackName).includes(normStr(title).slice(0, 12)) &&
-            (!artist || normStr(hit.artistName).includes(normStr(artist).slice(0, 8)) ||
-              normStr(artist).includes(normStr(hit.artistName).slice(0, 8)));
-          // iTunes IS Apple Music: no exact match means not there.
-          if (!exact && directService !== "Apple Music") markUnavailable("Apple Music");
+          // iTunes IS Apple Music; Deezer search IS Deezer: no exact match
+          // means not there — unless the saved link proves it directly.
+          if (!appleOk && directService !== "Apple Music") markUnavailable("Apple Music");
+          if (!deezerOk && directService !== "Deezer") markUnavailable("Deezer");
+          return { appleOk, deezerOk };
         }
 
         // --- Playable 30s preview via iTunes Search (no key needed) ---
@@ -698,23 +721,47 @@
           fetch("https://itunes.apple.com/search?term=" + term + "&media=music&entity=song&limit=1").then((r) =>
             r.ok ? r.json() : null,
           );
-        itunes(query)
-          .then((data) =>
+        // Two independent lookups: iTunes verifies Apple Music, Deezer
+        // verifies Deezer (plus backup cover + preview). Either may fail.
+        const deezerLookup = fetch(
+          "https://api.deezer.com/search?q=" + query + "&limit=3",
+        )
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => {
+            const rows = (d && d.data) || [];
+            return (
+              rows.find((r) => exactMatch(r.title || "", (r.artist && r.artist.name) || "")) || null
+            );
+          })
+          .catch(() => null);
+        Promise.all([
+          itunes(query).then((data) =>
             data && data.resultCount > 0 ? data : itunes(encodeURIComponent(title)),
-          )
-          .then((data) => {
+          ),
+          deezerLookup,
+        ])
+          .then(([data, dzHit]) => {
             const hit = (data && data.results && data.results[0]) || null;
-            applyAvailability(hit);
-            if (!hit || !hit.previewUrl) {
-              loadingEl.hidden = true; // verified (or not) — grid still works
+            const itOk =
+              (!!hit && exactMatch(hit.trackName || "", hit.artistName || "")) ||
+              directService === "Apple Music";
+            const dzOk = !!dzHit || directService === "Deezer";
+            applyAvailability(itOk ? hit : "no-apple", dzOk ? dzHit || {} : null);
+            const preview = (hit && hit.previewUrl) || (dzHit && dzHit.preview);
+            if (!preview) {
+              loadingEl.hidden = true;
               return;
             }
-            // Prefer high-res iTunes art when the link gave us nothing usable.
-            const itunesArt = hit.artworkUrl100
+            // Prefer high-res art when the link gave us nothing usable.
+            const itunesArt = hit && hit.artworkUrl100
               ? String(hit.artworkUrl100).replace("100x100bb", "600x600bb")
               : "";
-            if (!safeArt && itunesArt) setCover(itunesArt);
-            audio.src = hit.previewUrl;
+            const dzArt = dzHit && (dzHit.cover_big || dzHit.cover_medium);
+            if (!safeArt) {
+              if (itunesArt) setCover(itunesArt);
+              else if (dzArt) setCover(dzArt);
+            }
+            audio.src = preview;
             audio.addEventListener("timeupdate", () => {
               const d = audio.duration || 30;
               trackFill.style.width = ((audio.currentTime / d) * 100).toFixed(1) + "%";
@@ -728,8 +775,8 @@
             playerEl.hidden = false;
           })
           .catch(() => {
-            loadingEl.hidden = true; // no preview — services grid still works
-            applyAvailability(null);
+            loadingEl.hidden = true; // lookups failed — services grid still works
+            applyAvailability(null, null);
           });
 
         playBtn.addEventListener("click", () => {
