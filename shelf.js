@@ -113,7 +113,33 @@
     } catch { return []; }
   }
 
-  // Shared-shelf view (#p= link).
+  // iTunes artwork resolver (no key) with session cache. Fills art for
+  // shared songs that arrived without any.
+  const artCache = new Map();
+  async function resolveArt(t, a) {
+    const key = (t + "|||" + a).toLowerCase();
+    if (artCache.has(key)) return artCache.get(key);
+    const p = (async () => {
+      try {
+        const r = await fetch(
+          "https://itunes.apple.com/search?term=" +
+            encodeURIComponent([t, a].filter(Boolean).join(" ")) +
+            "&media=music&entity=song&limit=1",
+        );
+        if (!r.ok) return "";
+        const d = await r.json();
+        const hit = d && d.results && d.results[0];
+        const art = hit && hit.artworkUrl100 ? String(hit.artworkUrl100) : "";
+        return art ? art.replace("100x100bb", "600x600bb") : "";
+      } catch {
+        return "";
+      }
+    })();
+    artCache.set(key, p);
+    return p;
+  }
+
+  // Shared-shelf view (#p= link): pinned favourite on top, playlist below.
   const shared = decodeShare(location.hash || "");
   if (shared.length) {
     document.getElementById("sharedBanner").hidden = false;
@@ -121,12 +147,71 @@
       shared.length + " song" + (shared.length > 1 ? "s" : "") + " — save them or just press play.";
     const grid = $("shelfGrid");
     grid.innerHTML = "";
+    grid.hidden = true;
     $("shelfTitle").textContent = "Shared shelf";
     $("shelfMeta").textContent = shared.length + " songs";
     $("shelfEmpty").hidden = true;
     $("shareRow").hidden = true;
     $("addBox").hidden = true;
-    for (const s of shared) grid.appendChild(cardEl(s, false));
+    const [first, ...rest] = shared;
+    const wrap = document.getElementById("playlistWrap");
+    wrap.hidden = false;
+    // Pinned favourite.
+    const fCard = document.getElementById("featuredCard");
+    fCard.href = songPageUrl(first);
+    document.getElementById("featuredTitle").textContent = first.t;
+    document.getElementById("featuredSub").textContent =
+      [first.a, first.al].filter(Boolean).join(" · ") || "Unknown artist";
+    const fArt = document.getElementById("featuredArt");
+    if (first.art) {
+      fArt.src = first.art;
+    } else {
+      fArt.src = "icon.svg";
+      resolveArt(first.t, first.a).then((url) => {
+        if (url) fArt.src = url;
+      });
+    }
+    document.getElementById("playSharedBtn").addEventListener("click", () => {
+      location.href = songPageUrl(first);
+    });
+    // The rest, playlist-style with resolved artwork.
+    const rows = document.getElementById("playlistRows");
+    rows.innerHTML = "";
+    rest.forEach((s, i) => {
+      const row = document.createElement("a");
+      row.className = "prow";
+      row.href = songPageUrl(s);
+      const n = document.createElement("span");
+      n.className = "n";
+      n.textContent = String(i + 2).padStart(2, "0");
+      const img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      img.src = s.art || "icon.svg";
+      if (!s.art) {
+        resolveArt(s.t, s.a).then((url) => {
+          if (url) img.src = url;
+        });
+      }
+      const mid = document.createElement("div");
+      mid.style.minWidth = "0";
+      const b = document.createElement("b");
+      b.textContent = s.t;
+      const sp = document.createElement("span");
+      sp.textContent = s.a || "Unknown artist";
+      mid.appendChild(b);
+      mid.appendChild(sp);
+      const chev = document.createElement("span");
+      chev.className = "chev";
+      chev.textContent = "›";
+      chev.setAttribute("aria-hidden", "true");
+      row.appendChild(n);
+      row.appendChild(img);
+      row.appendChild(mid);
+      row.appendChild(chev);
+      row.style.animationDelay = (i * 0.06).toFixed(2) + "s";
+      rows.appendChild(row);
+    });
     $("saveAllBtn").addEventListener("click", () => {
       const mine = loadShelf();
       const have = new Set(mine.map((o) => (o.t + "|||" + o.a).toLowerCase()));

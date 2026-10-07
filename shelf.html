@@ -18,25 +18,53 @@
   <body class="shelf-page">
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="fav-top">
-      <a class="fav-brand" href="index.html" aria-label="FavSongs home">
-        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#ffb020"/><path d="M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z" fill="#0b0a08"/><circle cx="23" cy="8.6" r="2" fill="#0b0a08" opacity=".5"/></svg>
-        FavSongs
-      </a>
-      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
-      <a class="btn btn-sm" href="index.html#discover" style="text-decoration:none">Discover</a>
-      <span id="authArea"></span>
+      <div class="fav-top-inner">
+        <a class="fav-brand" href="index.html" aria-label="FavSongs home">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#ffb020"/><path d="M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z" fill="#0b0a08"/><circle cx="23" cy="8.6" r="2" fill="#0b0a08" opacity=".5"/></svg>
+          FavSongs
+        </a>
+        <nav class="fav-nav" aria-label="Primary">
+          <a href="shelf.html">My shelf</a>
+          <a href="index.html#discover">Discover</a>
+          <a href="song.html">Sample song</a>
+        </nav>
+        <div class="fav-top-spot">
+          <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
+          <span id="authArea"></span>
+        </div>
+      </div>
     </header>
     <main id="main" class="shelf-main">
-<div class="shared-banner" id="sharedBanner" hidden>
-        <div><b id="sharedTitle">Someone shared their shelf with you</b><span id="sharedSub"></span></div>
+<div class="shared-hero" id="sharedBanner" hidden>
+      <div class="shared-hero-in">
+        <div class="grow">
+          <p class="eyebrow">Shared shelf</p>
+          <h2 id="sharedTitle">Someone shared their shelf with you</h2>
+          <p id="sharedSub"></p>
+        </div>
         <div class="fav-actions">
+          <button class="btn btn-primary btn-sm" id="playSharedBtn" type="button">▶ Play first</button>
           <button class="btn btn-primary btn-sm" id="saveAllBtn" type="button">Save all to my shelf</button>
           <button class="btn btn-sm" id="dismissSharedBtn" type="button">Dismiss</button>
         </div>
+      </div>
+    </div>
       <section class="fav-sec" id="shelf">
         <div class="fav-sec-head">
           <h2 id="shelfTitle">Your shelf</h2>
           <p id="shelfMeta"></p>
+        </div>
+        <div id="playlistWrap" hidden>
+          <a class="featured" id="featuredCard" href="#">
+            <img id="featuredArt" alt="" />
+            <span>
+              <span class="kicker">Pinned favourite</span>
+              <b id="featuredTitle"></b>
+              <span id="featuredSub"></span>
+              <span class="go"><i>▶</i> Open song page</span>
+            </span>
+          </a>
+          <div class="playlist" id="playlistRows"></div>
         </div>
         <div class="shelf-grid" id="shelfGrid"></div>
         <div class="fav-empty" id="shelfEmpty" hidden>
