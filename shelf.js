@@ -141,10 +141,29 @@
 
   // Shared-shelf view (#p= link): pinned favourite on top, playlist below.
   const shared = decodeShare(location.hash || "");
+  const SVC_LOGO = {
+    "open.spotify.com": "https://cdn.simpleicons.org/spotify",
+    "music.apple.com": "https://cdn.simpleicons.org/applemusic",
+    "music.youtube.com": "https://cdn.simpleicons.org/youtubemusic",
+    "youtube.com": "https://cdn.simpleicons.org/youtube",
+    "soundcloud.com": "https://cdn.simpleicons.org/soundcloud",
+    "deezer.com": "https://cdn.simpleicons.org/deezer",
+  };
+  function svcLogo(u) {
+    try {
+      const host = new URL(u).hostname.toLowerCase().replace(/^www\./, "");
+      for (const h of Object.keys(SVC_LOGO)) {
+        if (host === h || host.endsWith("." + h)) return SVC_LOGO[h];
+      }
+      return "";
+    } catch {
+      return "";
+    }
+  }
   if (shared.length) {
-    document.getElementById("sharedBanner").hidden = false;
-    document.getElementById("sharedSub").textContent =
-      shared.length + " song" + (shared.length > 1 ? "s" : "") + " — save them or just press play.";
+    document.getElementById("sharedBar").hidden = false;
+    document.getElementById("sharedNote").textContent =
+      shared.length + " song" + (shared.length > 1 ? "s" : "") + " shared with you — save them or just press play.";
     const grid = $("shelfGrid");
     grid.innerHTML = "";
     grid.hidden = true;
@@ -174,7 +193,7 @@
     document.getElementById("playSharedBtn").addEventListener("click", () => {
       location.href = songPageUrl(first);
     });
-    // The rest, playlist-style with resolved artwork.
+    // The rest, playlist-style with resolved artwork + source logos.
     const rows = document.getElementById("playlistRows");
     rows.innerHTML = "";
     rest.forEach((s, i) => {
@@ -184,6 +203,8 @@
       const n = document.createElement("span");
       n.className = "n";
       n.textContent = String(i + 2).padStart(2, "0");
+      const thumb = document.createElement("span");
+      thumb.className = "thumb";
       const img = document.createElement("img");
       img.alt = "";
       img.loading = "lazy";
@@ -193,6 +214,7 @@
           if (url) img.src = url;
         });
       }
+      thumb.appendChild(img);
       const mid = document.createElement("div");
       mid.style.minWidth = "0";
       const b = document.createElement("b");
@@ -201,14 +223,31 @@
       sp.textContent = s.a || "Unknown artist";
       mid.appendChild(b);
       mid.appendChild(sp);
+      const right = document.createElement("span");
+      right.style.display = "flex";
+      right.style.alignItems = "center";
+      right.style.gap = "0.55rem";
+      const logo = svcLogo(s.u || "");
+      if (logo) {
+        const dot = document.createElement("img");
+        dot.className = "svc-dot";
+        dot.alt = "";
+        dot.loading = "lazy";
+        dot.width = 22;
+        dot.height = 22;
+        dot.src = logo;
+        dot.onerror = () => dot.remove();
+        right.appendChild(dot);
+      }
       const chev = document.createElement("span");
       chev.className = "chev";
       chev.textContent = "›";
       chev.setAttribute("aria-hidden", "true");
+      right.appendChild(chev);
       row.appendChild(n);
-      row.appendChild(img);
+      row.appendChild(thumb);
       row.appendChild(mid);
-      row.appendChild(chev);
+      row.appendChild(right);
       row.style.animationDelay = (i * 0.06).toFixed(2) + "s";
       rows.appendChild(row);
     });

@@ -19,10 +19,7 @@
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="fav-top">
       <div class="fav-top-inner">
-        <a class="fav-brand" href="index.html" aria-label="FavSongs home">
-          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#ffb020"/><path d="M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z" fill="#0b0a08"/><circle cx="23" cy="8.6" r="2" fill="#0b0a08" opacity=".5"/></svg>
-          FavSongs
-        </a>
+        <a class="fav-brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
         <nav class="fav-nav" aria-label="Primary">
           <a href="shelf.html">My shelf</a>
           <a href="index.html#discover">Discover</a>
@@ -35,29 +32,23 @@
       </div>
     </header>
     <main id="main" class="shelf-main">
-<div class="shared-hero" id="sharedBanner" hidden>
-      <div class="shared-hero-in">
-        <div class="grow">
-          <p class="eyebrow">Shared shelf</p>
-          <h2 id="sharedTitle">Someone shared their shelf with you</h2>
-          <p id="sharedSub"></p>
-        </div>
-        <div class="fav-actions">
+<div class="share-actions" id="sharedBar" hidden>
+        <span class="share-note" id="sharedNote"></span>
+        <span class="share-btns">
           <button class="btn btn-primary btn-sm" id="playSharedBtn" type="button">▶ Play first</button>
-          <button class="btn btn-primary btn-sm" id="saveAllBtn" type="button">Save all to my shelf</button>
-          <button class="btn btn-sm" id="dismissSharedBtn" type="button">Dismiss</button>
-        </div>
+          <button class="btn btn-sm" id="saveAllBtn" type="button">Save all</button>
+          <button class="btn btn-sm btn-ghost" id="dismissSharedBtn" type="button">Dismiss</button>
+        </span>
       </div>
-    </div>
       <section class="fav-sec" id="shelf">
         <div class="fav-sec-head">
           <h2 id="shelfTitle">Your shelf</h2>
           <p id="shelfMeta"></p>
         </div>
         <div id="playlistWrap" hidden>
-          <a class="featured" id="featuredCard" href="#">
+          <a class="featured featured-big" id="featuredCard" href="#">
             <img id="featuredArt" alt="" />
-            <span>
+            <span class="featured-meta">
               <span class="kicker">Pinned favourite</span>
               <b id="featuredTitle"></b>
               <span id="featuredSub"></span>
@@ -65,6 +56,7 @@
             </span>
           </a>
           <div class="playlist" id="playlistRows"></div>
+          <p class="made-with">Created with <a href="index.html"><b>Fav<em>Songs</em></b></a></p>
         </div>
         <div class="shelf-grid" id="shelfGrid"></div>
         <div class="fav-empty" id="shelfEmpty" hidden>

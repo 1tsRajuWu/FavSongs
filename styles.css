@@ -1798,8 +1798,8 @@ footer.site {
 /* FavSongs app pages (index + shelf) */
       body.fav-page { min-height: 100svh; display: flex; flex-direction: column; }
       /* (header layout lives in .fav-top-inner below) */
-      .fav-brand { display: flex; align-items: center; gap: 0.6rem; font-weight: 800; font-size: 1.15rem; text-decoration: none; color: var(--ink); }
-      .fav-brand svg { width: 30px; height: 30px; }
+      .fav-brand { display: inline-flex; align-items: baseline; gap: 0; font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; color: var(--ink); }
+      .fav-brand em { font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400; background: linear-gradient(120deg, var(--amber), var(--coral)); -webkit-background-clip: text; background-clip: text; color: transparent; }
       .fav-hero { padding: clamp(2.5rem, 6vw, 4.5rem) var(--rail) 1.5rem; position: relative; overflow: clip; }
       .fav-hero-grid {
         position: relative; max-width: 1120px; margin: 0 auto;
@@ -1836,7 +1836,7 @@ footer.site {
       .hero-card span { color: var(--ink-dim); font-size: 0.75rem; }
       .hero-card.c1 { left: 4%; top: 6%; }
       .c1-inner { transform: rotate(-6deg); }
-      .hero-card.c2 { right: 2%; top: 0; animation-delay: -2.4s; }
+      .hero-card.c2 { right: 0; top: -4%; animation-delay: -2.4s; }
       .hero-card.c2-inner { transform: rotate(5deg); }
       .hero-card.c3 { left: 22%; bottom: 0; animation-delay: -4.8s; }
       .hero-card.c3-inner { transform: rotate(-3deg); }
@@ -2032,3 +2032,60 @@ footer.site {
 @media (prefers-reduced-motion: reduce) {
   .shared-hero, .featured, .prow { animation: none; }
 }
+
+/* Shared view: slim action bar, big centered feature, roomy rows */
+.share-actions {
+  display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;
+  max-width: 1120px; margin: 0 auto; width: 100%;
+  padding: 1rem var(--rail) 0;
+}
+.share-note { color: var(--ink-dim); font-size: 0.9rem; flex: 1; min-width: 200px; }
+.share-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.btn-ghost { background: transparent; border: 1px solid var(--line); }
+.featured-big {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+  padding: clamp(1.6rem, 4vw, 2.6rem) clamp(1.2rem, 4vw, 2.5rem);
+  margin-bottom: 1rem;
+}
+.featured-big img {
+  width: min(300px, 68vw);
+}
+.featured-big .featured-meta {
+  display: flex; flex-direction: column; align-items: center;
+}
+.featured-big b { font-size: clamp(1.7rem, 4vw, 2.4rem); }
+.featured-big .go { margin-top: 1rem; }
+.prow {
+  grid-template-columns: 2.4rem 64px 1fr auto;
+  padding: 0.65rem 0.9rem 0.65rem 0.5rem;
+}
+.prow img { width: 64px; height: 64px; border-radius: 14px; }
+.prow .thumb {
+  position: relative; width: 64px; height: 64px; flex: none;
+}
+.prow .thumb img {
+  width: 100%; height: 100%; border-radius: 14px;
+}
+.prow .thumb::after {
+  content: "▶"; position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 15px; color: #fff; border-radius: 14px;
+  background: rgba(0,0,0,0.45); opacity: 0; transition: opacity 0.2s var(--ease);
+}
+.prow:hover .thumb::after, .prow:focus-visible .thumb::after { opacity: 1; }
+.prow .svc-dot {
+  width: 22px; height: 22px; border-radius: 50%; flex: none;
+  border: 1px solid var(--line);
+}
+.made-with {
+  text-align: center; color: var(--ink-faint); font-size: 0.85rem;
+  margin: 1.6rem 0 0.4rem;
+}
+.made-with a { color: var(--ink-dim); text-decoration: none; font-weight: 800; }
+.made-with a em {
+  font-family: Georgia, 'Times New Roman', serif; font-style: italic; font-weight: 400;
+  background: linear-gradient(120deg, var(--amber), var(--coral));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.made-with a:hover { color: var(--ink); }
