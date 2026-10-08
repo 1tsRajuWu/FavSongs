@@ -39,10 +39,8 @@
               <a class="btn" href="shelf.html#p=W3sidCI6ICJHaG9zdCIsICJhIjogIkp1c3RpbiBCaWViZXIiLCAiYWwiOiAiIiwgImFydCI6ICIiLCAidSI6ICJodHRwczovL29wZW4uc3BvdGlmeS5jb20vdHJhY2svNkkzbXFUd2hScG4zNFNMVmFmU0g3RyJ9LCB7InQiOiAiQmxpbmRpbmcgTGlnaHRzIiwgImEiOiAiVGhlIFdlZWtuZCIsICJhbCI6ICJBZnRlciBIb3VycyIsICJhcnQiOiAiIiwgInUiOiAiIn1d">See an example shelf</a>
             </div>
           </div>
-          <div class="hero-stack" aria-hidden="true">
-            <div class="hero-card c1"><div class="c1-inner"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/1a/37/d1/1a37d1b1-8508-54f2-f541-bf4e437dda76/19UMGIM05028.rgb.jpg/600x600bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>when the party's over</b><span>Billie Eilish</span></div></div>
-            <div class="hero-card c2"><div class="c2-inner"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/6c/11/d6/6c11d681-aa3a-d59e-4c2e-f77e181026ab/190295092665.jpg/600x600bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>Levitating</b><span>Dua Lipa</span></div></div>
-            <div class="hero-card c3"><div class="c3-inner"><img src="https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/e0/92/da/e092da2d-9f6d-11dc-7843-2021e95a2b61/21UMGIM17518.rgb.jpg/600x600bb.jpg" alt="" loading="lazy" onerror="this.onerror=null;this.src='icon.svg'" /><b>Ghost</b><span>Justin Bieber · my pick</span></div></div>
+          <div class="hero-stack" id="gardenHeroWrap" aria-hidden="true">
+            <canvas id="gardenHero" style="width:100%;height:100%;display:block"></canvas>
           </div>
         </div>
         <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
@@ -55,15 +53,7 @@
 
 
 
-      <section class="fav-sec" id="garden">
-        <div class="fav-sec-head">
-          <div><h2 style="margin:0">The garden</h2>
-          <p class="rail-sub" style="margin:0.15rem 0 0">Type anything — wildflowers grow out of your words</p></div>
-          <p style="margin:0"><a href="garden.html" style="color:var(--ink-dim)">Open fullscreen →</a></p>
-        </div>
-        <iframe src="garden.html" title="Type Garden — type to grow wildflowers" loading="lazy"
-          style="width:100%;height:min(72vh,620px);border:1px solid var(--line-strong);border-radius:24px;background:#000"></iframe>
-      </section>
+
 
       <footer class="fav-foot">
         <div class="fav-foot-grid">
@@ -89,6 +79,7 @@
     </main>
 
     <script src="site.js"></script>
+    <script src="garden-hero.js"></script>
     <script>
       (() => {
         "use strict";
@@ -97,19 +88,7 @@
           const seq = ["Spotify", "Apple Music", "YouTube Music", "YouTube", "SoundCloud", "Deezer"].map((n) => n + "  \u00b7 ").join("");
           mt.textContent = (seq + seq).repeat(2);
         }
-        if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
-          for (const card of document.querySelectorAll(".hero-card")) {
-            card.addEventListener("pointermove", (e) => {
-              if (e.pointerType === "touch") return;
-              const r = card.getBoundingClientRect();
-              const x = (e.clientX - r.left) / r.width - 0.5;
-              const y = (e.clientY - r.top) / r.height - 0.5;
-              card.style.transform = "perspective(700px) rotateX(" + (-y * 10).toFixed(2) + "deg) rotateY(" + (x * 12).toFixed(2) + "deg)";
-            });
-            card.addEventListener("pointerleave", () => { card.style.transform = ""; });
-          }
-        }
-      })();
+
     </script>
 
     <script src="supabase-config.js" onerror="this.remove()"></script>
