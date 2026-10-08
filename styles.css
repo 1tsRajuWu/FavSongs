@@ -275,6 +275,50 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 .sec-head p { color: var(--muted); margin: 0.2rem 0 0; max-width: 46ch; }
 .sec-body { display: grid; gap: clamp(1rem, 3vw, 2rem); }
 
+/* ------------------------------------------------------------- page heads */
+/* An inner page opens with one display sentence rather than a hero: the header
+   is 62px tall, so the first thing read is the page's own promise and the
+   content starts directly under it. */
+.page-head {
+  max-width: var(--maxw); margin: 0 auto;
+  padding: clamp(2.2rem, 7vw, 4.6rem) var(--rail) clamp(1.4rem, 3.4vw, 2.2rem);
+  border-bottom: 1px solid var(--line);
+}
+.page-head .display { font-size: clamp(1.9rem, 4.6vw, 3.2rem); max-width: 22ch; }
+.page-head .lede { margin: 0.9rem 0 0; }
+.page-head .toggles { margin-top: 1.2rem; }
+
+/* ------------------------------------------------------- where next (home) */
+/* One row of doors, a hairline above each: the shelf is the product, and the
+   pages that explain or list it are destinations, not another scroll. */
+.doors { display: grid; border-top: 1px solid var(--line); }
+@media (min-width: 820px) { .doors { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.door {
+  display: grid; gap: 0.45rem; align-content: start;
+  padding: 1.4rem 0 1.5rem; border-bottom: 1px solid var(--line);
+}
+@media (min-width: 820px) {
+  .door {
+    padding: 1.6rem clamp(1rem, 2.4vw, 1.8rem) 1.8rem;
+    border-bottom: 0; border-left: 1px solid var(--line);
+  }
+  .door:first-child { border-left: 0; padding-left: 0; }
+}
+.door .mini { color: var(--red); }
+.door b {
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(1.25rem, 2.2vw, 1.5rem); line-height: 1.1;
+  transition: color 0.3s var(--ease), transform 0.3s var(--ease);
+}
+.door p { margin: 0.15rem 0 0; color: var(--muted); font-size: 0.95rem; max-width: 34ch; }
+.door-go {
+  font-family: var(--mono); font-size: 0.85rem; color: var(--muted);
+  transition: transform 0.3s var(--ease), color 0.3s var(--ease);
+}
+.door:hover b { color: var(--red); }
+.door:hover .door-go { color: var(--red); transform: translateX(4px); }
+.door:active b { transform: translateY(1px); }
+
 /* -------------------------------------------------- song card (shelf grid) */
 .shelf-grid { display: grid; gap: 0.55rem; grid-template-columns: 1fr; }
 @media (min-width: 700px) { .shelf-grid { grid-template-columns: 1fr 1fr; } }
@@ -338,8 +382,13 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 .share-note, .fav-hint, #importHint, #shareHint { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted); }
 .cand-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.6rem; }
 .cand-row:empty { display: none; }
-.cand { padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-.cand:hover { border-color: var(--amber); color: var(--amber); }
+.cand {
+  padding: 0.45rem 0.85rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--line-2); background: var(--panel-2); color: var(--ink-dim);
+  font-size: 0.82rem; font-weight: 500;
+  transition: border-color 0.25s var(--ease), color 0.25s var(--ease), background 0.25s var(--ease);
+}
+.cand:hover { border-color: var(--red); color: var(--ink); background: var(--panel-3); }
 #importHint, #shareHint { display: block; margin-top: 0.6rem; }
 
 .share-row { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem; }
@@ -425,6 +474,25 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 .step .step-num { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--red); }
 .step h3 { font-family: var(--display); font-size: 1.3rem; margin: 0.7rem 0 0.5rem; }
 .step p { color: var(--muted); margin: 0; font-size: 0.95rem; }
+
+/* ------------------------------------------------------------ link shapes */
+/* The short address and the self-contained one, side by side. The short one
+   carries the accent: it is the shape most shares come out as. */
+.shapes { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
+@media (min-width: 780px) { .shapes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.shape { background: var(--panel); padding: clamp(1.2rem, 3vw, 1.9rem); display: grid; gap: 0.8rem; align-content: start; }
+.shape code {
+  display: block; font-family: var(--mono); line-height: 1.5; overflow-wrap: anywhere;
+  font-size: clamp(0.72rem, 1.5vw, 0.82rem); color: var(--ink-dim);
+  background: #000; border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 0.75rem 0.85rem;
+  /* two lines' worth, so the paragraph under both addresses starts on the
+     same line no matter how the address wraps */
+  min-height: 4.1rem;
+}
+.shape p { margin: 0; color: var(--muted); font-size: 0.95rem; max-width: 46ch; }
+.shape.is-short .mini { color: var(--red); }
+.shape.is-short code { color: var(--ink); border-color: var(--line-2); }
 
 /* ------------------------------------------------------------- one link */
 .link-split { display: grid; gap: clamp(1.4rem, 4vw, 3rem); align-items: center; }

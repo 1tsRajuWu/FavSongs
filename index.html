@@ -30,11 +30,10 @@
   <div class="top-inner">
     <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
     <nav class="nav" aria-label="Primary">
-      <a href="#shelf">Shelf</a>
-      <a href="#share">One link</a>
+      <a href="#shelf" aria-current="page">Shelf</a>
+      <a href="how.html">How it works</a>
+      <a href="discover.html">Discover</a>
       <a href="saved.html">Kept</a>
-      <a href="#how">How it works</a>
-      <a href="#discover">Discover</a>
     </nav>
     <div class="top-spot">
       <span id="authArea"></span>
@@ -49,11 +48,10 @@
     <span class="kicker is-plain">menu</span>
     <button class="icon-btn" id="menuClose" type="button" aria-label="Close menu">✕</button>
   </div>
-  <a href="#shelf">Shelf</a>
-  <a href="#share">One link</a>
+  <a href="#shelf" aria-current="page">Shelf</a>
+  <a href="how.html">How it works</a>
+  <a href="discover.html">Discover</a>
   <a href="saved.html">Kept</a>
-  <a href="#how">How it works</a>
-  <a href="#discover">Discover</a>
   <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A sample song</a>
   <a href="legal.html">Legal</a>
 </div>
@@ -115,6 +113,8 @@
   </div>
 
   <!-- ------------------------------------------------------- the shelf -->
+  <!-- This is the whole product, so it is the whole home page: everything that
+       explains or lists lives on its own page, one row of doors below. -->
   <section class="sec" id="shelf" aria-labelledby="shelfHeading">
     <div class="sec-head">
       <div>
@@ -122,7 +122,7 @@
         <h2 id="shelfHeading">Everything you keep, on one shelf.</h2>
         <p>Add a song, paste a link, or open a shelf someone sent you. Your shelf stays in this browser.</p>
       </div>
-      <a class="btn btn-sm" href="#how">How it works</a>
+      <a class="btn btn-sm" href="how.html">How it works</a>
     </div>
 
     <div id="sharedBar" hidden>
@@ -219,75 +219,30 @@
     </div>
   </section>
 
-  <!-- -------------------------------------------------------- one link -->
-  <section class="sec" id="share" aria-labelledby="shareHeading">
-    <div class="sec-head">
-      <div>
-        <p class="kicker">one link</p>
-        <h2 id="shareHeading">The link is the shelf.</h2>
-        <p>Send it in a chat, drop it in a bio, paste it in a message. Whoever opens it sees the same songs, in the same order.</p>
-      </div>
-    </div>
-
-    <div class="link-split">
-      <div class="reveal">
-        <ul class="link-points">
-          <li><span class="dot" aria-hidden="true"></span><span><b>Nothing to sign up for.</b> Whoever opens the link sees the same songs, in the same order, with no account wall on the other side.</span></li>
-          <li><span class="dot" aria-hidden="true"></span><span><b>Two shapes.</b> A short link from our backend when it is reachable, and a long self-contained link that always works — even offline.</span></li>
-          <li><span class="dot" aria-hidden="true"></span><span><b>Artwork and previews.</b> Rows resolve real covers and 30-second previews in the listener's browser.</span></li>
-          <li><span class="dot" aria-hidden="true"></span><span><b>Optional cloud.</b> Sign in with Google and your shelf follows you between devices; keep it private or list it in Discover.</span></li>
-        </ul>
-        <div class="actions" style="margin-top:1.6rem">
-          <a class="btn btn-primary" href="#shelf">Build your shelf</a>
-          <a class="btn" href="song.html?t=Ghost&amp;a=Justin%20Bieber">See a song page</a>
-        </div>
-      </div>
-
-      <figure class="signature reveal">
-        <!-- metadata only: the loop is already cached by the hero above, and
-             having data ready lets this one join the hero's clock instantly -->
-        <video class="loop" id="loopVideo" src="loop.mp4" poster="wordmark.svg" muted loop playsinline preload="metadata" aria-label="The FavSongs shelf mark, blooming"></video>
-      </figure>
-    </div>
-  </section>
-
-  <!-- --------------------------------------------------- how it works -->
-  <section class="sec" id="how" aria-labelledby="howHeading">
-    <div class="sec-head">
-      <div>
-        <p class="kicker">how it works</p>
-        <h2 id="howHeading">Three moves.</h2>
-      </div>
-    </div>
-    <div class="steps reveal">
-      <div class="step">
-        <span class="step-num">01 — save</span>
-        <h3>Keep your favourites</h3>
-        <p>Add a title and artist, or paste a track link and let the details fill themselves in.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">02 — order</span>
-        <h3>Make it read like a mood</h3>
-        <p>Your shelf keeps its order. The first song becomes the pinned favourite on the shared view.</p>
-      </div>
-      <div class="step">
-        <span class="step-num">03 — share</span>
-        <h3>Send one link</h3>
-        <p>Copy the link and hand it over. They can listen, open each song, or save the whole shelf to their own.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- -------------------------------------------------------- discover -->
-  <section class="sec" id="discover" hidden aria-labelledby="discoverHeading">
-    <div class="sec-head">
-      <div>
-        <p class="kicker">discover</p>
-        <h2 id="discoverHeading">Public shelves</h2>
-        <p>Shelves people chose to list. Open one and it saves to yours in a click.</p>
-      </div>
-    </div>
-    <div class="discover-grid" id="discoverGrid"></div>
+  <!-- ------------------------------------------------------ where next -->
+  <!-- One row, three doors, no cards: the shelf above is the product, so the
+       pages that explain it and the shelves people listed are destinations. -->
+  <section class="sec">
+    <nav class="doors reveal" aria-label="More of the site">
+      <a class="door" href="how.html">
+        <span class="mini">01 — one link</span>
+        <b>How it works</b>
+        <p>What the link carries, the two shapes it comes in, and what this site never does with your music.</p>
+        <span class="door-go" aria-hidden="true">→</span>
+      </a>
+      <a class="door" href="discover.html">
+        <span class="mini">02 — public shelves</span>
+        <b>Discover</b>
+        <p>Shelves people chose to list. Open one, keep it, or take its songs onto your own shelf.</p>
+        <span class="door-go" aria-hidden="true">→</span>
+      </a>
+      <a class="door" href="saved.html">
+        <span class="mini">03 — kept</span>
+        <b>Kept shelves</b>
+        <p>Every shelf you kept from a link, ready to reopen — rename it, reorder it, or let it go.</p>
+        <span class="door-go" aria-hidden="true">→</span>
+      </a>
+    </nav>
   </section>
 
   <footer class="foot">
@@ -300,8 +255,9 @@
         <nav aria-label="Product">
           <b>Product</b>
           <a href="#shelf">Your shelf</a>
-          <a href="#share">One link</a>
-          <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A song page</a>
+          <a href="how.html">How it works</a>
+          <a href="discover.html">Discover</a>
+          <a href="saved.html">Kept shelves</a>
         </nav>
         <nav aria-label="Legal">
           <b>Legal</b>
@@ -344,76 +300,6 @@
     window.SharedList.renderPlaylist(mount, demo, {});
     const note = document.getElementById("demoNote");
     if (note) note.textContent = demo.length + " songs · one link";
-  })();
-
-  /* Each loop only plays once it is actually on screen, so the 4 MB file never
-     blocks the first paint, and the two instances share one clock: the hero is
-     the clock, so the mark sits at the same point in the bloom wherever it is
-     on the page. Drift is corrected on timeupdate (a few times a second)
-     rather than per frame, measured the short way round the loop so a wrap is
-     not mistaken for drift. Reduced motion keeps the poster instead. */
-  (() => {
-    const vids = [...document.querySelectorAll("video.loop")];
-    if (!vids.length || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const TOL = 0.12;       // seconds of drift worth a seek
-    const COOLDOWN = 600;   // ms after a seek before the next one
-    const WAIT = 1200;      // ms a follower waits for the clock before starting
-    const lastSeek = new WeakMap();
-    const leading = () => vids.find((v) => !v.paused && v.readyState > 1);
-
-    // Shortest distance round the loop: 6.9s apart on a 7s loop is 0.1s apart.
-    const drift = (v, lead) => {
-      const dur = lead.duration || 7;
-      let d = v.currentTime - lead.currentTime;
-      if (d > dur / 2) d -= dur;
-      else if (d < -dur / 2) d += dur;
-      return d;
-    };
-
-    const align = (lead) => {
-      for (const v of vids) {
-        if (v === lead || v.paused || v.seeking || v.readyState < 2) continue;
-        if (Math.abs(drift(v, lead)) <= TOL) continue;
-        if (Date.now() - (lastSeek.get(v) || 0) < COOLDOWN) continue;
-        lastSeek.set(v, Date.now());
-        try { v.currentTime = lead.currentTime; } catch { /* not seekable yet */ }
-      }
-    };
-
-    const join = (v, waited) => {
-      const lead = leading();
-      // The hero leads; a follower would rather wait a moment than start the
-      // bloom over from zero while the clock is still starting up.
-      if (!lead && v !== vids[0] && waited < WAIT) {
-        setTimeout(() => join(v, waited + 200), 200);
-        return;
-      }
-      if (lead && lead !== v) {
-        lastSeek.set(v, Date.now());
-        try { v.currentTime = lead.currentTime; } catch { /* ignore */ }
-      }
-      if (v.play) v.play().catch(() => {});
-    };
-
-    const start = (v) => {
-      if (v.readyState >= 2) { join(v, WAIT); return; }
-      // A seek made before any frame exists is simply dropped, so wake the file
-      // up first and join the clock as soon as there is something to seek into.
-      v.preload = "auto";
-      v.addEventListener("loadeddata", () => join(v, 0), { once: true });
-      v.load();
-    };
-
-    const onTick = () => { const lead = leading(); if (lead) align(lead); };
-    vids.forEach((v) => v.addEventListener("timeupdate", onTick));
-
-    if (!("IntersectionObserver" in window)) { vids.forEach((v) => start(v)); return; }
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (e.isIntersecting) { start(e.target); io.unobserve(e.target); }
-      }
-    }, { rootMargin: "700px 0px" });   // wake a loop before it is on screen,
-    vids.forEach((v) => io.observe(v)); // so it joins the clock already running
   })();
 </script>
 </body>

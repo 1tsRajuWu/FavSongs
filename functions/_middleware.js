@@ -18,8 +18,11 @@
  */
 
 const ID_RE = /^[A-Za-z0-9_-]{6,12}$/;
-// Page names that sit at the root; none of them is a shelf id.
-const RESERVED = new Set(["", "index", "song", "s", "saved", "shelf", "legal"]);
+// Page names that sit at the root; none of them is a shelf id. Every page that
+// can be reached without its extension belongs here — otherwise a three-letter
+// page name fails ID_RE and the visitor gets the "link not found" viewer, and a
+// longer one is looked up as a shelf id.
+const RESERVED = new Set(["", "index", "song", "s", "saved", "shelf", "legal", "how", "discover"]);
 const MAX_SONGS = 24;
 const TIMEOUT_MS = 2500;
 const FALLBACK_IMAGE = "/og-cover.png";

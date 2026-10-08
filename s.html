@@ -36,9 +36,9 @@
     <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
     <nav class="nav" aria-label="Primary">
       <a href="index.html#shelf">Shelf</a>
-      <a href="index.html#share">One link</a>
+      <a href="how.html">How it works</a>
+      <a href="discover.html">Discover</a>
       <a href="saved.html">Kept</a>
-      <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A song</a>
     </nav>
     <div class="top-spot">
       <span id="authArea"></span>
@@ -54,9 +54,9 @@
     <button class="icon-btn" id="menuClose" type="button" aria-label="Close menu">✕</button>
   </div>
   <a href="index.html#shelf">Shelf</a>
-  <a href="index.html#share">One link</a>
+  <a href="how.html">How it works</a>
+  <a href="discover.html">Discover</a>
   <a href="saved.html">Kept</a>
-  <a href="index.html#how">How it works</a>
   <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A sample song</a>
   <a href="legal.html">Legal</a>
 </div>
@@ -123,7 +123,7 @@
     const seg = location.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
     // A root segment is the shelf id only when it is not a page: /s.html?id=…
     // (the old form, served here by the Function) must still read the query.
-    const RESERVED = ["s", "index", "song", "saved", "shelf", "legal"];
+    const RESERVED = ["s", "index", "song", "saved", "shelf", "legal", "how", "discover"];
     const fromPath =
       seg.length === 1 && !RESERVED.includes(seg[0]) && !seg[0].includes(".") ? seg[0] : "";
     const id = fromPath || new URLSearchParams(location.search).get("id") || "";

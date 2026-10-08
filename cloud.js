@@ -114,7 +114,7 @@ if (!configured) {
           options: { redirectTo: location.origin + location.pathname },
         });
       }, true);
-      cloudNote("Signed out — sign in with Google to sync this shelf across devices or list it in Discover. Sharing a link and opening one never need an account.");
+      cloudNote("Signed out — sign in with Google to sync a shelf across devices or list one in Discover. Sharing a link and opening one never need an account.");
       loadDiscover();
       return;
     }
@@ -156,11 +156,21 @@ if (!configured) {
     });
     authArea.innerHTML = "";
     authArea.appendChild(b);
-    cloudNote("Signed in as " + String(name).split(" ")[0] + " — this shelf is on your account and Discover is on. Click your name above to sign out.");
-    try {
-      await merge();
-    } catch (e) {
-      console.warn("cloud sync failed", e);
+    // Syncing needs the shelf on the page. On a page that only reads (Discover)
+    // the account is still shown and merge() is not attempted at all.
+    const shelfHere = !!(B && document.getElementById("shelfGrid"));
+    cloudNote(
+      "Signed in as " + String(name).split(" ")[0] +
+        (shelfHere
+          ? " — this shelf is on your account and Discover is on. Click your name above to sign out."
+          : " — the shelves on this account follow you between devices. Click your name above to sign out."),
+    );
+    if (shelfHere) {
+      try {
+        await merge();
+      } catch (e) {
+        console.warn("cloud sync failed", e);
+      }
     }
     loadDiscover();
 
@@ -219,6 +229,9 @@ if (!configured) {
       if (!sec || !grid) return;
       grid.innerHTML = "";
       sec.hidden = false;
+      // Real shelves are here, so the first-run state stands down.
+      const empty = document.getElementById("discoverEmpty");
+      if (empty) empty.hidden = true;
       for (const row of data) {
         const n = (row.shelf_songs && row.shelf_songs[0] && row.shelf_songs[0].count) || 0;
         const owner = names[row.user_id] ? " · by " + names[row.user_id] : "";
@@ -242,8 +255,9 @@ if (!configured) {
           const p = btoa(unescape(encodeURIComponent(JSON.stringify(
             songs.map((s) => ({ t: s.t, a: s.a, al: s.al, art: s.art, u: s.u })),
           )))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-          location.hash = "#p=" + p;
-          location.reload();
+          // The shelf opens where the shelf actually lives, so a card works
+          // from any page — Discover included, which is where the cards are.
+          location.href = "index.html#p=" + p;
         });
         grid.appendChild(card);
       }

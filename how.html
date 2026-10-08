@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>How it works — FavSongs</title>
+<meta name="description" content="What a FavSongs link carries, the two shapes it comes in, the three moves that make a shelf, and what this site never does with your music." />
+<link rel="canonical" href="https://favsongs.pages.dev/how" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FavSongs" />
+<meta property="og:title" content="How it works — FavSongs" />
+<meta property="og:description" content="The link is the shelf: what it carries, the two shapes it comes in, and what this site never does with your music." />
+<meta property="og:url" content="https://favsongs.pages.dev/how" />
+<meta property="og:image" content="https://favsongs.pages.dev/og-cover.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="FavSongs — keep the songs you love, share them as one link" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="How it works — FavSongs" />
+<meta name="twitter:description" content="The link is the shelf: what it carries, the two shapes it comes in, and what this site never does with your music." />
+<meta name="twitter:image" content="https://favsongs.pages.dev/og-cover.png" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="fonts.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="how-page">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html#shelf">Shelf</a>
+      <a href="how.html" aria-current="page">How it works</a>
+      <a href="discover.html">Discover</a>
+      <a href="saved.html">Kept</a>
+    </nav>
+    <div class="top-spot">
+      <span id="authArea"></span>
+      <a class="btn btn-primary btn-sm top-cta" href="index.html#shelf">Build your shelf</a>
+      <button class="icon-btn" id="menuOpen" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">☰</button>
+    </div>
+  </div>
+</header>
+
+<div id="mobileNav" aria-label="Menu">
+  <div class="sheet-head">
+    <span class="kicker is-plain">menu</span>
+    <button class="icon-btn" id="menuClose" type="button" aria-label="Close menu">✕</button>
+  </div>
+  <a href="index.html#shelf">Shelf</a>
+  <a href="how.html" aria-current="page">How it works</a>
+  <a href="discover.html">Discover</a>
+  <a href="saved.html">Kept</a>
+  <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A sample song</a>
+  <a href="legal.html">Legal</a>
+</div>
+<div id="mobileBackdrop"></div>
+
+<main id="main">
+  <header class="page-head">
+    <p class="kicker">how it works</p>
+    <h1 class="display" id="howTitle">The link is the shelf.</h1>
+    <p class="lede">Send it in a chat, drop it in a bio, paste it in a message. Whoever opens it sees the same songs, in the same order, with nothing to sign up for.</p>
+  </header>
+
+  <!-- ------------------------------------------------------- what it carries -->
+  <section class="sec" aria-labelledby="carryHeading">
+    <div class="link-split">
+      <div class="reveal">
+        <div class="sec-head">
+          <div>
+            <h2 id="carryHeading">What the link carries.</h2>
+          </div>
+        </div>
+        <ul class="link-points">
+          <li><span class="dot" aria-hidden="true"></span><span><b>Nothing to sign up for.</b> Whoever opens the link sees the same songs, in the same order, with no account wall on the other side.</span></li>
+          <li><span class="dot" aria-hidden="true"></span><span><b>Two shapes.</b> A short link from our backend when it is reachable, and a long self-contained link that always works — even offline.</span></li>
+          <li><span class="dot" aria-hidden="true"></span><span><b>Artwork and previews.</b> Rows resolve real covers and 30-second previews in the listener's browser.</span></li>
+          <li><span class="dot" aria-hidden="true"></span><span><b>Optional cloud.</b> Sign in with Google and your shelf follows you between devices; keep it private or list it in Discover.</span></li>
+        </ul>
+      </div>
+
+      <figure class="signature reveal">
+        <!-- metadata only: the loop is already cached by the home page's hero, and
+             having data ready lets this one join the clock instantly -->
+        <video class="loop" id="loopVideo" src="loop.mp4" poster="wordmark.svg" muted loop playsinline preload="metadata" aria-label="The FavSongs shelf mark, blooming"></video>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- three moves -->
+  <section class="sec" aria-labelledby="movesHeading">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">three moves</p>
+        <h2 id="movesHeading">Three moves.</h2>
+        <p>Save, order, share. Nothing else is asked of you, and any of it can be undone.</p>
+      </div>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <span class="step-num">01 — save</span>
+        <h3>Keep your favourites</h3>
+        <p>Add a title and artist, or paste a track link and let the details fill themselves in.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02 — order</span>
+        <h3>Make it read like a mood</h3>
+        <p>Your shelf keeps its order. The first song becomes the pinned favourite on the shared view.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03 — share</span>
+        <h3>Send one link</h3>
+        <p>Copy the link and hand it over. They can listen, open each song, or save the whole shelf to their own.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- two shapes -->
+  <section class="sec" aria-labelledby="shapesHeading">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">two shapes</p>
+        <h2 id="shapesHeading">A short address, or one that carries itself.</h2>
+        <p>Every share hands you the first one when our backend answers, and the second when it does not. Both open the same shelf.</p>
+      </div>
+    </div>
+    <div class="shapes reveal">
+      <div class="shape is-short">
+        <span class="mini">short link</span>
+        <code>favsongs.pages.dev/4f9c2a</code>
+        <p>Points at a row in our backend, which is what lets the same address be updated when your shelf changes instead of being replaced. Fits a bio.</p>
+      </div>
+      <div class="shape">
+        <span class="mini">long link</span>
+        <code>favsongs.pages.dev/#p=eyJ0IjoiRHJlYW1zIiwiYSI6IkZsZWV0d29vZCB…</code>
+        <p>The whole shelf inside the address itself. It works with the backend down, works from a saved file, and needs nothing but the songs to open.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- -------------------------------------------------------- what it never -->
+  <section class="sec" aria-labelledby="neverHeading">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">the fine print</p>
+        <h2 id="neverHeading">What it never does.</h2>
+      </div>
+    </div>
+    <ul class="link-points reveal">
+      <li><span class="dot" aria-hidden="true"></span><span><b>No trackers, no advertising, no analytics.</b> Nothing on this site counts you, follows you, or sells you anything.</span></li>
+      <li><span class="dot" aria-hidden="true"></span><span><b>Nothing is uploaded until you press Share.</b> Until then your shelf is a few kilobytes in your own browser, and the only copy is yours.</span></li>
+      <li><span class="dot" aria-hidden="true"></span><span><b>No account wall on the other side.</b> A link you send opens for whoever has it, signed in or not, on whatever device they are holding.</span></li>
+      <li><span class="dot" aria-hidden="true"></span><span><b>No email in our tables.</b> Signing in with Google keeps your display name, your picture and your shelf; the address itself stays in the authentication record. The <a href="legal.html#privacy">privacy policy</a> says the same thing in the same words.</span></li>
+    </ul>
+  </section>
+
+  <section class="sec">
+    <div class="actions reveal">
+      <a class="btn btn-primary" href="index.html#shelf">Build your shelf</a>
+      <a class="btn" href="discover.html">See public shelves</a>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="foot-copy">© <span data-year>2026</span> FavSongs — the link carries the songs, and nothing else.</p>
+</footer>
+
+<script src="site.js"></script>
+</body>
+</html>

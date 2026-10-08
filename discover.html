@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Discover — public shelves on FavSongs</title>
+<meta name="description" content="Shelves people chose to list publicly. Open one to hear it, keep it on this device, or take its songs onto your own shelf." />
+<link rel="canonical" href="https://favsongs.pages.dev/discover" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FavSongs" />
+<meta property="og:title" content="Discover — public shelves on FavSongs" />
+<meta property="og:description" content="Shelves people chose to list publicly. Open one, keep it, or take its songs onto your own." />
+<meta property="og:url" content="https://favsongs.pages.dev/discover" />
+<meta property="og:image" content="https://favsongs.pages.dev/og-cover.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="FavSongs — keep the songs you love, share them as one link" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Discover — public shelves on FavSongs" />
+<meta name="twitter:description" content="Shelves people chose to list publicly. Open one, keep it, or take its songs onto your own." />
+<meta name="twitter:image" content="https://favsongs.pages.dev/og-cover.png" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="fonts.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="discover-page">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html#shelf">Shelf</a>
+      <a href="how.html">How it works</a>
+      <a href="discover.html" aria-current="page">Discover</a>
+      <a href="saved.html">Kept</a>
+    </nav>
+    <div class="top-spot">
+      <span id="authArea"></span>
+      <a class="btn btn-primary btn-sm top-cta" href="index.html#shelf">Build your shelf</a>
+      <button class="icon-btn" id="menuOpen" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">☰</button>
+    </div>
+  </div>
+</header>
+
+<div id="mobileNav" aria-label="Menu">
+  <div class="sheet-head">
+    <span class="kicker is-plain">menu</span>
+    <button class="icon-btn" id="menuClose" type="button" aria-label="Close menu">✕</button>
+  </div>
+  <a href="index.html#shelf">Shelf</a>
+  <a href="how.html">How it works</a>
+  <a href="discover.html" aria-current="page">Discover</a>
+  <a href="saved.html">Kept</a>
+  <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A sample song</a>
+  <a href="legal.html">Legal</a>
+</div>
+<div id="mobileBackdrop"></div>
+
+<main id="main">
+  <header class="page-head">
+    <p class="kicker">discover</p>
+    <h1 class="display" id="discoverTitle">Public shelves.</h1>
+    <p class="lede">Shelves people chose to list. Open one to hear it, keep it on this device, or take its songs onto your own.</p>
+    <!-- cloud.js writes the signed-in or signed-out line here. Listing a shelf
+         needs a Google account; reading these pages never does. -->
+    <div class="toggles"><span id="cloudNote" class="fav-hint"></span></div>
+  </header>
+
+  <section class="sec" id="discover" hidden aria-labelledby="discoverHeading">
+    <div class="sec-head">
+      <div>
+        <h2 id="discoverHeading">Listed by people who keep shelves here.</h2>
+        <p>Each card opens the shelf as its owner shared it. Nothing is copied to your device until you keep it.</p>
+      </div>
+    </div>
+    <div class="discover-grid" id="discoverGrid"></div>
+  </section>
+
+  <section class="sec" id="discoverEmpty" aria-labelledby="emptyHeading">
+    <div class="shelf-empty">
+      <b id="emptyHeading">Nothing is listed yet.</b>
+      <p>Public shelves appear here the moment somebody ticks <b class="inline">List my shelf in Discover</b> on their own shelf. You can be the first: build one, sign in with Google, and list it.</p>
+      <div class="actions">
+        <a class="btn btn-sm btn-primary" href="index.html#shelf">Build your shelf</a>
+        <a class="btn btn-sm" href="how.html">How it works</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p class="foot-copy">© <span data-year>2026</span> FavSongs — listed shelves are public, and yours stays yours.</p>
+</footer>
+
+<script src="site.js"></script>
+<script src="supabase-config.js" onerror="this.remove()"></script>
+<script type="module" src="cloud.js"></script>
+</body>
+</html>
