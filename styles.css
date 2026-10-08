@@ -2241,3 +2241,38 @@ body.viewer .fav-top .btn {
   border: 1px solid var(--line-strong); border-radius: 999px;
   padding: 0.1rem 0.45rem; backdrop-filter: blur(8px);
 }
+/* Manual-copy share box (clipboard-denied fallback — no prompt() dialogs) */
+.share-box {
+  display: flex; gap: 0.6rem; margin-top: 0.8rem; align-items: center;
+}
+.share-box input {
+  flex: 1; min-width: 0; padding: 0.65rem 0.9rem; border-radius: 12px;
+  border: 1px solid var(--amber); background: rgba(255,255,255,0.05);
+  color: var(--ink); font-size: 0.85rem; font-family: ui-monospace, monospace;
+}
+/* Service tag: never clipped */
+.svc .na-tag { flex: none; white-space: nowrap; }
+.svc { min-width: 0; }
+/* Player vertical rhythm */
+.player { align-items: center; }
+.player .eq { align-self: center; }
+.track-meta { align-items: baseline; }
+
+/* Rhythm pass: index trending cadence, explore air, hint alignment */
+#trending .fav-sec-head { align-items: baseline; }
+#trending .fav-sec-head h2 { display: flex; align-items: center; gap: 0.6rem; }
+#trending .fav-sec-head h2::before {
+  content: ""; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--amber); box-shadow: 0 0 12px var(--amber);
+  animation: blink 2.2s ease-in-out infinite;
+}
+#trending { margin-top: 0.6rem; }
+#trending .rail { padding-bottom: 1rem; }
+main.explore-main { max-width: 1200px; }
+main.explore-main .rail-sec { margin: 2.6rem 0 0; }
+main.explore-main .rail { gap: 1rem; padding-bottom: 1.1rem; }
+.fav-import { align-items: start; }
+.fav-import .fav-hint, #importHint {
+  display: block; flex-basis: 100%; margin: 0.15rem 0 0;
+  line-height: 1.5; text-align: left;
+}

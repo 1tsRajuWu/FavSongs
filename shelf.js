@@ -88,6 +88,54 @@
     for (const s of shelf) grid.appendChild(cardEl(s, true));
   }
 
+  function shortId() {
+    const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const buf = new Uint32Array(8);
+    crypto.getRandomValues(buf);
+    let s = "";
+    for (const x of buf) s += abc[x % 62];
+    return s;
+  }
+
+  // Short backend link (/s.html?id=) with offline #p= fallback. Never throws.
+  async function createShortLink(shelf) {
+    try {
+      const base = window.FAVSONGS_SUPABASE_URL || "";
+      const key = window.FAVSONGS_SUPABASE_ANON_KEY || "";
+      if (!base.startsWith("https://") || base.includes("YOUR_NEW") || key.length < 20) return null;
+      const slim = shelf.slice(0, 24).map((s) => ({
+        t: s.t, a: s.a || "", al: s.al || "", art: s.art || "", u: s.u || "",
+      }));
+      const id = shortId();
+      const r = await fetch(base + "/rest/v1/shared_links", {
+        method: "POST",
+        headers: {
+          apikey: key,
+          Authorization: "Bearer " + key,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify({ id, songs: slim }),
+      });
+      if (!r.ok) return null;
+      return location.origin + "/s.html?id=" + id;
+    } catch {
+      return null;
+    }
+  }
+
+  async function copyText(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch { /* denied / headless */ }
+    try {
+      return document.execCommand("copy");
+    } catch {
+      return false;
+    }
+  }
+
   function encodeShare(shelf) {
     const slim = shelf.slice(0, SHARE_CAP).map((s) => ({
       t: s.t, a: s.a || "", al: s.al || "", art: s.art || "", u: s.u || "",
@@ -189,13 +237,34 @@
   $("shareBtn").addEventListener("click", async () => {
     const shelf = loadShelf();
     if (!shelf.length) return;
-    const link = encodeShare(shelf);
-    try {
-      await navigator.clipboard.writeText(link);
-      $("shareHint").textContent = "Copied — anyone opening it sees this shelf.";
-    } catch {
-      prompt("Copy your share link:", link);
-    }
+    const hint = $("shareHint");
+    const box = document.getElementById("shareBox");
+    const input = document.getElementById("shareLink");
+    hint.textContent = "Making a short link…";
+    // Short backend link first (bio-friendly), long self-contained link
+    // as the offline fallback. Never prompt() — dialogs get suppressed.
+    const link = (await createShortLink(shelf)) || encodeShare(shelf);
+    const short = !link.includes("#p=");
+    input.value = link;
+    box.hidden = false;
+    input.focus();
+    input.select();
+    const copied = await copyText(link);
+    hint.textContent = copied
+      ? short
+        ? "Copied — short link, fits bios and chats."
+        : "Copied — long link (cloud unreachable, still works)."
+      : "Copy the link below manually.";
+  });
+
+  $("shareCopyBtn").addEventListener("click", async () => {
+    const input = document.getElementById("shareLink");
+    input.focus();
+    input.select();
+    const copied = await copyText(input.value);
+    $("shareHint").textContent = copied
+      ? "Copied."
+      : "Copy the link above manually.";
   });
 
   $("addBtn").addEventListener("click", () => {
