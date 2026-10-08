@@ -7,6 +7,27 @@ const URL = window.FAVSONGS_SUPABASE_URL || "";
 const KEY = window.FAVSONGS_SUPABASE_ANON_KEY || "";
 const configured = URL.startsWith("https://") && !URL.includes("YOUR_NEW") && KEY.length > 20;
 
+/* One line beside the shelf that says which side of the gate you are on.
+ *
+ * Everything cloud — sync, publishing to Discover, a shelf that follows you
+ * between devices — needs the Google account, and the account is the only thing
+ * that needs it: the shelf in this browser and every link somebody was sent stay
+ * open. The line is created here so every page with a cloud area gets it without
+ * repeating the markup. */
+function cloudNote(text) {
+  const wrap = document.querySelector(".toggles");
+  if (!wrap) return;
+  let el = document.getElementById("cloudNote");
+  if (!el) {
+    el = document.createElement("span");
+    el.id = "cloudNote";
+    el.className = "fav-hint";
+    wrap.appendChild(el);
+  }
+  el.textContent = text || "";
+  el.hidden = !text;
+}
+
 function authBtn(label, fn, primary) {
   const b = document.createElement("button");
   b.type = "button";
@@ -93,6 +114,7 @@ if (!configured) {
           options: { redirectTo: location.origin + location.pathname },
         });
       }, true);
+      cloudNote("Signed out — sign in with Google to sync this shelf across devices or list it in Discover. Sharing a link and opening one never need an account.");
       loadDiscover();
       return;
     }
@@ -134,6 +156,7 @@ if (!configured) {
     });
     authArea.innerHTML = "";
     authArea.appendChild(b);
+    cloudNote("Signed in as " + String(name).split(" ")[0] + " — this shelf is on your account and Discover is on. Click your name above to sign out.");
     try {
       await merge();
     } catch (e) {
@@ -151,9 +174,23 @@ if (!configured) {
     if (tgl) {
       tgl.addEventListener("change", async () => {
         const { data: { session: s2 } } = await sb.auth.getSession();
-        if (!s2) return;
+        // An expired session used to leave the box ticked with nothing saved:
+        // put the box back and say why.
+        if (!s2) {
+          tgl.checked = !tgl.checked;
+          cloudNote("Signed out — sign in with Google again to publish this shelf.");
+          return;
+        }
         const row = await myShelfRow(s2.user.id);
-        await sb.from("shelves").update({ is_public: tgl.checked }).eq("id", row.id);
+        const { error } = await sb.from("shelves").update({ is_public: tgl.checked }).eq("id", row.id);
+        if (error) {
+          tgl.checked = !tgl.checked;
+          cloudNote("Could not change that — nothing was published. Try again in a moment.");
+          return;
+        }
+        cloudNote(tgl.checked
+          ? "Listed — this shelf shows up in Discover for anyone browsing."
+          : "Unlisted — the shelf is yours again. A link you already sent still works.");
         loadDiscover();
       });
     }

@@ -379,7 +379,13 @@
   $("shareBtn").addEventListener("click", async () => {
     if (sharing) return;
     const shelf = loadShelf();
-    if (!shelf.length) return;
+    // An enabled button that does nothing reads as a broken page. There is
+    // nothing to hand over yet, so say that and put the cursor where the fix is.
+    if (!shelf.length) {
+      $("shareHint").textContent = "Nothing to share yet — add a song above and share it as one link.";
+      $("fTitle").focus();
+      return;
+    }
     const hint = $("shareHint");
     const box = document.getElementById("shareBox");
     const input = document.getElementById("shareLink");
@@ -396,6 +402,10 @@
     // get suppressed.
     let link = remembered ? remembered.link : "";
     let updated = false;
+    // True when this browser owned a link and the backend refused to take the
+    // new shelf: the caller mints a fresh id, and the older link keeps pointing
+    // at the older songs. The copy says so instead of calling both "your link".
+    let forked = false;
     if (!link) {
       const own = store ? store.loadShare() : null;
       if (own) {
@@ -403,6 +413,8 @@
         if (await updateShortLink(own, shelf)) {
           link = own.link || location.origin + "/" + own.id;
           updated = true;
+        } else {
+          forked = true;
         }
       }
       if (!link) {
@@ -427,10 +439,33 @@
       ? short
         ? updated
           ? "Copied — the same link, now carrying this shelf."
-          : "Copied — short link, fits bios and chats."
+          : forked
+            ? "Copied — a new link. The one this browser made before still shows the older shelf."
+            : "Copied — short link, fits bios and chats."
         : "Copied — long link (cloud unreachable, still works)."
       : "Copy the link below manually.";
   });
+
+  /* The link this browser already made, put back on screen when the page loads.
+     Without it a reader who shared yesterday has to press Share again — and a
+     reshare that the backend refuses mints yet another link, which is exactly
+     how a bio ends up pointing at a shelf nobody updated. */
+  function showOwnedLink() {
+    const box = document.getElementById("shareBox");
+    const input = document.getElementById("shareLink");
+    if (!box || !input || input.value) return;
+    const shelf = loadShelf();
+    const own = store ? store.loadShare() : null;
+    if (!own || !own.link || !shelf.length) return;
+    input.value = own.link;
+    box.hidden = false;
+    const remembered = store.loadLink(shelfKey(shelf));
+    $("shareHint").textContent =
+      remembered && remembered.link === own.link
+        ? "The link this browser made — press Share to copy it again."
+        : "The link this browser made; the shelf has changed since. Press Share to carry the new songs.";
+  }
+  showOwnedLink();
 
   $("shareCopyBtn").addEventListener("click", async () => {
     const input = document.getElementById("shareLink");

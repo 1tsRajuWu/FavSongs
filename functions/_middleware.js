@@ -74,6 +74,40 @@ function cleanStr(value, max) {
     .slice(0, max);
 }
 
+/* Card text is attacker-written.
+ *
+ * Anybody can insert a row with the public anon key — that is how a shelf gets
+ * shared at all — so the shelf a link points at is untrusted input. HTMLRewriter
+ * escapes the quotes for us, and a title or a description with < in it cannot
+ * break out of an attribute; what it can still do is land markup in a chat
+ * preview that shows the text verbatim, and read as something this site never
+ * wrote. Angle brackets and backticks go before the card is built. */
+function cardText(value, max) {
+  const flat = typeof value === "string" ? value.replace(/[<>`]+/g, " ") : "";
+  return cleanStr(flat, max);
+}
+
+/* The cover URL is attacker-written too, and unlike the text it is not bounded
+ * by a field cap anywhere else: a row may carry a very long string. Rewrite the
+ * generic card when the value is not a plain https URL, and cap its length so
+ * one row cannot make the preview carry an unbounded amount. */
+const ART_MAX = 400;
+
+function cardArt(value) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw || raw.length > ART_MAX) return "";
+  // No whitespace, quotes, angle brackets or backslashes: the value goes into
+  // an attribute and into a fetchable image URL, so it stays a bare URL.
+  if (/[\s"'<>`\\]/.test(raw)) return "";
+  try {
+    const url = new URL(raw);
+    if (url.protocol !== "https:" || !url.hostname.includes(".")) return "";
+  } catch {
+    return "";
+  }
+  return raw;
+}
+
 function clip(text, max) {
   if (text.length <= max) return text;
   const cut = text.slice(0, max - 1);
@@ -155,8 +189,10 @@ async function fetchSongs(config, id) {
     const songs = [];
     for (const s of raw) {
       if (!s || typeof s.t !== "string" || !s.t.trim()) continue;
-      const art = typeof s.art === "string" && s.art.startsWith("https://") ? s.art : "";
-      songs.push({ t: cleanStr(s.t, 120), a: cleanStr(s.a, 120), art });
+      const title = cardText(s.t, 120);
+      // A title that was nothing but markup is not a title.
+      if (!title) continue;
+      songs.push({ t: title, a: cardText(s.a, 120), art: cardArt(s.art) });
       if (songs.length === MAX_SONGS) break;
     }
     return songs; // [] means the row exists but holds no usable songs

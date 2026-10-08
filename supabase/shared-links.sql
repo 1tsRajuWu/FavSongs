@@ -118,7 +118,16 @@ end;
 $$;
 
 -- ------------------------------------------------------------------- cleanup
--- Rows our own testing left behind. Safe to run; delete anything of yours that
--- you do not want public. (This needs a policy, so run it with the SQL editor,
--- which acts as the table owner.)
-delete from public.shared_links where id in ('ogtest01', 'zzprobe1');
+-- Rows testing left behind, including the two this repository's own probes
+-- wrote on production: one filled by the site's Share button while checking that
+-- a link survives a reload, and one inserted straight through the REST API with
+-- hostile markup to see how the link preview renders untrusted text.
+-- Safe to run; delete anything of yours that you do not want public. (This
+-- needs a policy, so run it with the SQL editor, which acts as the table owner.)
+-- The list below is every id a probe in this repository wrote. Playing with the
+-- site yourself leaves rows here too — ids from earlier rounds of testing,
+-- worth deleting if they are not yours: k4Zawopk, qnCOGf1U, eA3xCAse, kfbA9r1T,
+-- x48cMjBu, fJARYLVZ, w85anw2f, aec6u3x6, h4ca87gk, 9vpjzkbp.
+delete from public.shared_links
+ where id in ('ogtest01', 'zzprobe1', 'x297t2uj', 'u3shrw4e', 'secpwn01',
+              '4qg7efb6', 'purgtu2k');

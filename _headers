@@ -1,14 +1,17 @@
-/* FavSongs site — Cloudflare Pages security headers.
- *
- * Type, the shelf mark, the service logos and the loop video are all served from
- * this origin. What stays external is public music data fetched by the browser:
- * iTunes Search (artwork + 30-second previews on a separate audio host), Deezer,
- * lyrics.ovh, the Spotify/YouTube oEmbed endpoints used when importing a link,
- * and Supabase for the optional cloud shelf.
- *
- * Scripts and connections are pinned to named hosts; images and audio previews
- * come from per-track CDNs, so those two directives allow any HTTPS origin.
- */
+# FavSongs site — Cloudflare Pages security headers.
+#
+# Type, the shelf mark, the service logos and the loop video are all served from
+# this origin. What stays external is public music data fetched by the browser:
+# iTunes Search (artwork + 30-second previews on a separate audio host), Deezer,
+# lyrics.ovh, the Spotify/YouTube oEmbed endpoints used when importing a link,
+# and Supabase for the optional cloud shelf.
+#
+# Scripts and connections are pinned to named hosts; images and audio previews
+# come from per-track CDNs, so those two directives allow any HTTPS origin.
+#
+# Comments in this file are `#` lines. A `/* … */` block is not a comment here:
+# every line of it gets read as a rule, which is what `wrangler pages dev`
+# complains about — hence the plain comments above.
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
