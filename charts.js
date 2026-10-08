@@ -43,7 +43,10 @@
     }
   }
 
-  // Country via Cloudflare trace (free, keyless). Falls back to US.
+  // Country via ipapi (accurate client geo) with Cloudflare trace as
+  // fallback. Cloudflare's loc sometimes reports the edge colo instead of
+  // the visitor (notably behind VPNs), so trace is only plan B.
+  // A manual pick (country picker UI) always wins and persists.
   let countryCache = null;
   async function detectCountry() {
     if (countryCache) return countryCache;
@@ -55,18 +58,65 @@
       }
     } catch { /* private mode */ }
     try {
+      const saved = localStorage.getItem("favsongs.cc.override");
+      if (saved && /^[a-z]{2}$/.test(saved)) {
+        countryCache = saved;
+        return saved;
+      }
+    } catch { /* private mode */ }
+    countryCache = (await detectCountryFresh()) || "us";
+    return countryCache;
+  }
+
+  // Fresh detection without touching any cache (for the picker preview).
+  async function detectCountryFresh() {
+    try {
+      const r = await fetch("https://ipapi.co/json/");
+      if (r.ok) {
+        const d = await r.json();
+        const cc = String(d && d.country_code ? d.country_code : "").toLowerCase();
+        if (/^[a-z]{2}$/.test(cc)) {
+          rememberCountry(cc);
+          return cc;
+        }
+      }
+    } catch { /* blocked/offline */ }
+    try {
       const r = await fetch("https://www.cloudflare.com/cdn-cgi/trace");
       const t = await r.text();
       const m = t.match(/loc=([A-Z]{2})/);
       const cc = (m ? m[1] : "US").toLowerCase();
-      countryCache = /^[a-z]{2}$/.test(cc) ? cc : "us";
-    } catch {
-      countryCache = "us";
-    }
+      if (/^[a-z]{2}$/.test(cc)) {
+        rememberCountry(cc);
+        return cc;
+      }
+    } catch { /* blocked/offline */ }
+    return "us";
+  }
+
+  function rememberCountry(cc) {
     try {
-      sessionStorage.setItem("favsongs.cc", countryCache);
+      sessionStorage.setItem("favsongs.cc", cc);
     } catch { /* private mode */ }
-    return countryCache;
+  }
+
+  function setCountryOverride(cc) {
+    cc = String(cc || "").toLowerCase();
+    if (!/^[a-z]{2}$/.test(cc)) return false;
+    try {
+      localStorage.setItem("favsongs.cc.override", cc);
+      sessionStorage.setItem("favsongs.cc", cc);
+    } catch { /* private mode */ }
+    countryCache = cc;
+    return true;
+  }
+
+  function clearCountryOverride() {
+    try {
+      localStorage.removeItem("favsongs.cc.override");
+      sessionStorage.removeItem("favsongs.cc");
+    } catch { /* private mode */ }
+    countryCache = null;
   }
 
   function cacheGet(key) {
@@ -157,7 +207,8 @@
   }
 
   window.FavCharts = {
-    detectCountry, fetchAppleChart, fetchDeezerChart, mergeCharts,
+    detectCountry, detectCountryFresh, setCountryOverride, clearCountryOverride,
+    fetchAppleChart, fetchDeezerChart, mergeCharts,
     combinedTrending, chartOk,
   };
 })();

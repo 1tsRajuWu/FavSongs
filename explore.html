@@ -32,7 +32,7 @@
         <a class="fav-brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
         <nav class="fav-nav" aria-label="Primary">
           <a href="shelf.html">My shelf</a>
-          <a href="index.html#discover">Discover</a>
+          <a href="explore.html#discover">Discover</a>
           <a href="explore.html" aria-current="page">Explore</a>
         </nav>
         <div class="fav-top-spot">
@@ -57,6 +57,17 @@
         <h2>Results</h2>
         <p id="resultsMeta"></p>
         <div class="rail" id="resultsRail"></div>
+      </section>
+
+      <section class="rail-sec" id="geoSec">
+        <div class="fav-sec-head">
+          <div><h2 style="margin:0">Trending near you</h2>
+          <p class="rail-sub" style="margin:0.15rem 0 0">Detecting your country…</p></div>
+          <p style="margin:0"><label class="fav-hint" style="display:inline-flex;align-items:center;gap:0.45rem">Country
+            <select id="countryPick" aria-label="Chart country"></select>
+          </label></p>
+        </div>
+        <div class="rail" id="geoRail"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
       </section>
 
       <section class="rail-sec">
@@ -207,8 +218,55 @@
           ]).then(([us, inn, dz]) => {
             paintRail("comboRail", window.FavCharts.mergeCharts([us, inn, dz], 12));
           }).catch(() => paintRail("comboRail", []));
+          // Geo rail + manual country override (persisted, beats auto-detect).
+          const COUNTRIES = [
+            ["auto", "Auto-detect"], ["us", "United States"], ["in", "India"],
+            ["jp", "Japan"], ["gb", "United Kingdom"], ["kr", "South Korea"],
+            ["br", "Brazil"], ["fr", "France"], ["de", "Germany"],
+            ["ca", "Canada"], ["au", "Australia"], ["mx", "Mexico"],
+            ["es", "Spain"], ["it", "Italy"], ["ph", "Philippines"], ["id", "Indonesia"],
+          ];
+          const pick = document.getElementById("countryPick");
+          const sub = document.querySelector("#geoSec .rail-sub");
+          function paintGeo(cc) {
+            if (sub) sub.textContent = "Combined Apple Music + Deezer · " + String(cc).toUpperCase();
+            window.FavCharts.combinedTrending(cc)
+              .then((items) => paintRail("geoRail", items))
+              .catch(() => paintRail("geoRail", []));
+          }
+          if (pick) {
+            for (const [v, label] of COUNTRIES) {
+              const o = document.createElement("option");
+              o.value = v;
+              o.textContent = label;
+              pick.appendChild(o);
+            }
+            let initial = "auto";
+            try {
+              const ov = localStorage.getItem("favsongs.cc.override");
+              if (ov && /^[a-z]{2}$/.test(ov)) initial = ov;
+            } catch { /* private mode */ }
+            pick.value = initial;
+            const applyPick = () => {
+              const v = pick.value;
+              if (v === "auto") {
+                window.FavCharts.clearCountryOverride();
+                window.FavCharts.detectCountryFresh().then(paintGeo).catch(() => paintGeo("us"));
+              } else if (window.FavCharts.setCountryOverride(v)) {
+                paintGeo(v);
+              }
+            };
+            pick.addEventListener("change", applyPick);
+            if (initial === "auto") {
+              window.FavCharts.detectCountry().then(paintGeo).catch(() => paintGeo("us"));
+            } else {
+              paintGeo(initial);
+            }
+          } else {
+            window.FavCharts.detectCountry().then(paintGeo).catch(() => paintGeo("us"));
+          }
         } else {
-          for (const id of ["appleRail", "deezerRail", "comboRail"]) paintRail(id, []);
+          for (const id of ["appleRail", "deezerRail", "comboRail", "geoRail"]) paintRail(id, []);
         }
       })();
     </script>
