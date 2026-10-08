@@ -336,6 +336,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 .fav-row { display: flex; gap: 0.7rem; align-items: center; flex-wrap: wrap; margin-top: 0.9rem; }
 .fav-row .grow { flex: 1 1 220px; }
 .share-note, .fav-hint, #importHint, #shareHint { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted); }
+.cand-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-top: 0.6rem; }
+.cand-row:empty { display: none; }
+.cand { padding: 0.45rem 0.85rem; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--card); color: var(--ink); font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.cand:hover { border-color: var(--amber); color: var(--amber); }
 #importHint, #shareHint { display: block; margin-top: 0.6rem; }
 
 .share-row { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem; }
@@ -506,6 +510,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 .track-meta { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.66rem; color: var(--muted); margin-top: 0.45rem; }
 .player-loading { width: 22px; height: 22px; border-radius: 999px; border: 2px solid var(--line-2); border-top-color: var(--red); animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+.embed-frame { margin: 1.4rem 0 0; max-width: 560px; }
+.embed-frame iframe { width: 100%; border: 0; border-radius: 12px; display: block; background: #000; }
+.embed-frame figcaption { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.06em; color: var(--muted); margin-top: 0.45rem; }
 
 .like-btn {
   display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.5rem 0.85rem;
@@ -575,7 +582,32 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
   text-transform: uppercase; color: var(--muted);
 }
 .kept-toggle:hover { color: var(--ink); }
-.kept-songs { margin-top: 0.2rem; }
+/* A kept shelf is editable where it sits: the name in the heading, the note
+   under it, and one pair of order controls per row in the list below. */
+.kept-note {
+  margin: 0.5rem 0 0; padding-left: 0.7rem; border-left: 2px solid var(--line-2);
+  font-size: 0.92rem; color: var(--ink-dim); overflow-wrap: anywhere;
+}
+.kept-edit {
+  display: grid; gap: 0.85rem; margin-top: 0.9rem; padding: clamp(0.8rem, 2vw, 1.1rem);
+  border: 1px solid var(--line); border-radius: var(--r); background: var(--panel-2);
+}
+.kept-edit .fields { gap: 0.65rem; }
+.kept-songs { margin-top: 0.2rem; grid-template-columns: 1fr; }
+.kept-song { display: flex; align-items: center; gap: 0.4rem; }
+.kept-song .song-card { flex: 1 1 auto; }
+.kept-move { display: flex; align-items: center; gap: 0.2rem; flex: none; }
+.kept-move button {
+  width: 30px; height: 30px; border-radius: 999px; border: 1px solid var(--line);
+  display: grid; place-items: center; color: var(--ink-dim); font-size: 0.95rem; line-height: 1;
+  transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+.kept-move button:hover:not(:disabled) { border-color: var(--line-2); color: var(--ink); }
+.kept-move button:disabled { opacity: 0.3; cursor: default; }
+.kept-pos {
+  font-family: var(--mono); font-size: 0.64rem; color: var(--faint);
+  min-width: 1.3rem; text-align: right;
+}
 #keptNote { display: block; margin: 0 0 1rem; }
 .kept-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0 0 1.4rem; }
 .link-btn {

@@ -24,6 +24,37 @@
   const shelfTitle = (songs) =>
     songs.length > 1 ? songs[0].t + " and " + (songs.length - 1) + " more" : songs[0].t;
 
+  /* One labelled input, the same shape the home page uses. */
+  function fieldFor(id, label, placeholder, max) {
+    const wrap = document.createElement("div");
+    wrap.className = "field";
+    const l = document.createElement("label");
+    l.setAttribute("for", id);
+    l.textContent = label;
+    const input = document.createElement("input");
+    input.id = id;
+    input.type = "text";
+    input.maxLength = max;
+    input.placeholder = placeholder;
+    input.autocomplete = "off";
+    wrap.append(l, input);
+    return { wrap, input };
+  }
+
+  /* What a rename or a note says when it lands. One line, like every other
+     action on this page, so the same gesture always answers the same way. */
+  function editSaved(before, after) {
+    if (!after.title && !after.note) return "Cleared the name and note.";
+    if (after.title !== before.title) {
+      return after.title ? "Named it “" + after.title + "”." : "Back to the songs for the name.";
+    }
+    return "Saved the note.";
+  }
+
+  /* Each editable card gets its own field ids, so two cards open at once never
+     fight over the same label target. */
+  let editSeq = 0;
+
   /* The short id in the link someone sent, when there is one: it is the string
      the shelf is known by, so two entries holding the same songs stay apart. */
   function shortIdOf(url) {
@@ -110,25 +141,58 @@
   }
 
   function entry(k) {
+    /* The card edits one record in place: `current` is that record, and every
+       change below goes through store.js and comes back here. */
+    let current = k;
+    let listOpen = false;
     const el = document.createElement("article");
     el.className = "panel kept";
 
     const head = document.createElement("div");
     head.className = "kept-head";
-    head.append(coverStack(k.songs));
+    head.append(coverStack(current.songs));
 
     const title = document.createElement("div");
     title.className = "kept-title";
     const h = document.createElement("h3");
-    h.textContent = shelfTitle(k.songs);
     const m = document.createElement("p");
     m.className = "mini";
-    const short = shortIdOf(k.url);
-    m.textContent =
-      k.songs.length + " song" + (k.songs.length > 1 ? "s" : "") + " · " + keptWhen(k.at) +
-      (short ? " · /" + short : "");
-    title.append(h, m);
+    const note = document.createElement("p");
+    note.className = "kept-note";
+    title.append(h, m, note);
     head.append(title);
+
+    /* Rename and note: the two things a shelf grows after it is kept. The panel
+       is built once and revealed in place, so opening it never re-renders the
+       page and whatever sits under the card keeps its scroll. */
+    editSeq += 1;
+    const panelId = "kept-edit-" + editSeq;
+    const panel = document.createElement("div");
+    panel.className = "kept-edit";
+    panel.id = panelId;
+    panel.hidden = true;
+    const fields = document.createElement("div");
+    fields.className = "fields";
+    const nameText = fieldFor(panelId + "-name", "Shelf name", "Name this shelf", 60);
+    const noteText = fieldFor(panelId + "-note", "Note", "Why you kept it (optional)", 120);
+    const nameInput = nameText.input;
+    const noteInput = noteText.input;
+    fields.append(nameText.wrap, noteText.wrap);
+    const panelActions = document.createElement("div");
+    panelActions.className = "actions";
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn btn-sm btn-primary";
+    saveBtn.type = "button";
+    saveBtn.textContent = "Save";
+    const cancelBtn = document.createElement("button");
+    cancelBtn.className = "btn btn-sm btn-ghost";
+    cancelBtn.type = "button";
+    cancelBtn.textContent = "Cancel";
+    const hint = document.createElement("span");
+    hint.className = "fav-hint";
+    hint.textContent = "The order is edited in the song list below";
+    panelActions.append(saveBtn, cancelBtn, hint);
+    panel.append(fields, panelActions);
 
     const actions = document.createElement("div");
     actions.className = "kept-actions";
@@ -144,11 +208,11 @@
     add.type = "button";
     add.textContent = "Add to my shelf";
     add.addEventListener("click", () => {
-      const added = store.addSongs(k.songs);
+      const added = store.addSongs(current.songs);
       say(
         added
           ? "Added " + added + " song" + (added > 1 ? "s" : "") + " to your shelf."
-          : "All " + k.songs.length + " songs are already on your shelf.",
+          : "All " + current.songs.length + " songs are already on your shelf.",
         { label: "see your shelf", href: "index.html#shelf" },
       );
     });
@@ -165,34 +229,157 @@
     drop.type = "button";
     drop.textContent = "Remove";
     drop.addEventListener("click", () => {
-      store.dropKept(k.id);
+      store.dropKept(current.id);
       render();
-      say("Removed “" + shelfTitle(k.songs) + "”.", {
+      say("Removed “" + nameOf(current) + "”.", {
         label: "Undo",
-        // Same entry, same timestamp: it comes back where it was.
-        run: () => { store.keep({ ...k }); render(); say("Put back."); },
+        // Same entry, same name, same note, same timestamp: it comes back as it was.
+        run: () => { store.keep({ ...current }); render(); say("Put back."); },
       });
     });
-    actions.append(add, copy, drop);
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn btn-sm btn-ghost";
+    editBtn.type = "button";
+    editBtn.textContent = "Edit";
+    editBtn.setAttribute("aria-expanded", "false");
+    editBtn.setAttribute("aria-controls", panel.id);
+    editBtn.addEventListener("click", () => {
+      const open = panel.hidden;
+      panel.hidden = !open;
+      editBtn.setAttribute("aria-expanded", String(open));
+      if (!open) return;
+      // The fields start from what is stored, never from the last thing typed.
+      nameInput.value = current.title;
+      noteInput.value = current.note;
+      nameInput.focus();
+    });
+    actions.append(editBtn, add, copy, drop);
     head.append(actions);
-    el.append(head);
+    el.append(head, panel);
 
     const toggle = document.createElement("button");
     toggle.className = "kept-toggle";
     toggle.type = "button";
-    toggle.setAttribute("aria-expanded", "false");
-    toggle.textContent = "Show the " + k.songs.length + " song" + (k.songs.length > 1 ? "s" : "");
-    const songs = document.createElement("div");
-    songs.className = "shelf-grid kept-songs";
-    songs.hidden = true;
-    toggle.addEventListener("click", () => {
-      songs.hidden = !songs.hidden;
-      toggle.setAttribute("aria-expanded", String(!songs.hidden));
+    const songsBox = document.createElement("div");
+    songsBox.className = "shelf-grid kept-songs";
+    songsBox.hidden = true;
+
+    /* What the card calls this shelf: the name someone gave it, or the songs. */
+    function nameOf() {
+      return current.title || shelfTitle(current.songs);
+    }
+
+    /* Everything the card prints comes from `current`, so one paint keeps the
+       heading, the meta line, the note and the toggle label in step. */
+    function paint() {
+      const short = shortIdOf(current.url);
+      h.textContent = nameOf();
+      m.textContent =
+        current.songs.length + " song" + (current.songs.length > 1 ? "s" : "") + " · " + keptWhen(current.at) +
+        (short ? " · /" + short : "");
+      note.textContent = current.note;
+      note.hidden = !current.note;
       toggle.textContent =
-        (songs.hidden ? "Show" : "Hide") + " the " + k.songs.length + " song" + (k.songs.length > 1 ? "s" : "");
-      if (!songs.childElementCount) k.songs.forEach((s) => songs.append(songCard(s)));
+        (listOpen ? "Hide" : "Show") + " the " + current.songs.length + " song" + (current.songs.length > 1 ? "s" : "");
+      toggle.setAttribute("aria-expanded", String(listOpen));
+    }
+
+    function moveBtn(glyph, label, disabled, run) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = glyph;
+      b.disabled = disabled;
+      b.setAttribute("aria-label", label);
+      b.addEventListener("click", run);
+      return b;
+    }
+
+    /* Each row carries its own order controls: the list is where the order
+       matters, so the buttons sit one row away from the thing they move. */
+    function songRow(s, at, total) {
+      const row = document.createElement("div");
+      row.className = "kept-song";
+      row.append(songCard(s));
+      const bar = document.createElement("div");
+      bar.className = "kept-move";
+      const pos = document.createElement("span");
+      pos.className = "kept-pos";
+      pos.textContent = String(at + 1).padStart(2, "0");
+      bar.append(
+        pos,
+        moveBtn("↑", "Move “" + s.t + "” up", at === 0, () => move(at, -1)),
+        moveBtn("↓", "Move “" + s.t + "” down", at === total - 1, () => move(at, 1)),
+      );
+      row.append(bar);
+      return row;
+    }
+
+    /* Reordering repaints the rows only: the name, the note, the panel and the
+       page under the card all stay exactly where they were, and the button that
+       was pressed keeps focus on the row it moved. */
+    function paintSongs(focusAt, focusWhich) {
+      songsBox.textContent = "";
+      current.songs.forEach((s_, at) => songsBox.append(songRow(s_, at, current.songs.length)));
+      if (focusAt == null) return;
+      const row = songsBox.children[focusAt];
+      if (!row) return;
+      const [up, down] = row.querySelectorAll(".kept-move button");
+      const wanted = focusWhich === "up" ? up : down;
+      const target = wanted && !wanted.disabled ? wanted : (wanted === up ? down : up);
+      if (target) target.focus();
+    }
+
+    function move(at, delta) {
+      const next = store.moveKeptSong(current.id, at, delta);
+      if (!next) {
+        say("Could not reorder that shelf.");
+        return;
+      }
+      current = next;
+      paintSongs(at + delta, delta < 0 ? "up" : "down");
+      say("Moved “" + next.songs[at + delta].t + "” " + (delta < 0 ? "up" : "down") + ".");
+    }
+
+    toggle.addEventListener("click", () => {
+      listOpen = !listOpen;
+      songsBox.hidden = !listOpen;
+      if (listOpen && !songsBox.childElementCount) paintSongs();
+      paint();
     });
-    el.append(toggle, songs);
+
+    saveBtn.addEventListener("click", () => {
+      const before = { title: current.title, note: current.note };
+      const next = store.editKept(current.id, { title: nameInput.value, note: noteInput.value });
+      if (!next) {
+        say("Could not save that — this browser refused the write.");
+        return;
+      }
+      current = next;
+      panel.hidden = true;
+      editBtn.setAttribute("aria-expanded", "false");
+      paint();
+      say(editSaved(before, next), {
+        label: "Undo",
+        run: () => {
+          const back = store.editKept(current.id, before);
+          if (!back) {
+            say("Could not undo that.");
+            return;
+          }
+          current = back;
+          paint();
+          say("Put the name and note back.");
+        },
+      });
+    });
+
+    cancelBtn.addEventListener("click", () => {
+      panel.hidden = true;
+      editBtn.setAttribute("aria-expanded", "false");
+    });
+
+    el.append(toggle, songsBox);
+    paint();
     return el;
   }
 
