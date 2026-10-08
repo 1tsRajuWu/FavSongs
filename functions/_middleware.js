@@ -26,6 +26,11 @@ const FALLBACK_IMAGE = "/og-cover.png";
 const FALLBACK_W = 1200;
 const FALLBACK_H = 630;
 const GENERIC_ALT = "FavSongs — keep the songs you love, share them as one link";
+const SCRIPT_HEADERS = {
+  "content-type": "application/javascript; charset=utf-8",
+  "cache-control": "public, max-age=300",
+  "x-content-type-options": "nosniff",
+};
 
 let configCache = null;
 
@@ -73,6 +78,32 @@ async function supabaseConfig(env, request) {
   } catch {
     return null; // asset missing — the generic card in s.html stands
   }
+}
+
+/** The cloud config, as JavaScript.
+ *
+ * Every page loads /supabase-config.js. When a deploy ships no config file,
+ * Pages answers that path with its SPA fallback — HTML where a script is
+ * expected — and the browser refuses it and logs a MIME-type error in the
+ * console. So this path always answers with JavaScript: the deployed file when
+ * it is really there, the project's own variables when the dashboard has them,
+ * and an empty module when this deploy has no cloud config at all. */
+async function configScript(request, env) {
+  const config = await supabaseConfig(env, request);
+  if (config) {
+    return new Response(
+      "window.FAVSONGS_SUPABASE_URL = " + JSON.stringify(config.url) + ";\n" +
+        "window.FAVSONGS_SUPABASE_ANON_KEY = " + JSON.stringify(config.key) + ";\n",
+      { headers: SCRIPT_HEADERS },
+    );
+  }
+  // No variables and no config file: anything else at this path (a hand-written
+  // module, or the SPA fallback) is passed through as long as it is JavaScript.
+  const asset = await env.ASSETS.fetch(request);
+  if (asset.ok && /javascript/i.test(asset.headers.get("content-type") || "")) return asset;
+  return new Response("/* FavSongs cloud config: this deploy has none, so the site runs local-only. */\n", {
+    headers: SCRIPT_HEADERS,
+  });
 }
 
 /** Songs for one short id, or null when we genuinely could not check. */
@@ -211,6 +242,7 @@ export async function onRequest(context) {
   if (request.method !== "GET" && request.method !== "HEAD") return next();
 
   const url = new URL(request.url);
+  if (url.pathname === "/supabase-config.js") return configScript(request, env);
   const id = requestedId(url);
   if (!id) return next(); // a real page or asset: let it through
 

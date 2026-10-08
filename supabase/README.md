@@ -40,13 +40,21 @@ two redirect URLs above.
 ## Link previews (`/s?id=…`)
 
 Chat apps fetch a shared link with plain HTTP and never run JavaScript, so
-they can't read `shared_links` through the page. `functions/s.js` (a Pages
-Function on `/s`, plus `/s.html` for links already in the wild) looks the
-shelf up the same way the page does and rewrites the head with the real
-`og:`/`twitter:` card — first song title and artist, song count, and the
-first cover the shelf has (Apple Music covers are re-requested at 600×600).
-With no cover it uses `/og-cover.png`, the 1200×630 card committed at the
-repo root.
+they can't read `shared_links` through the page. `functions/_middleware.js`
+(the one Pages Function; it answers `/<id>`, `/s?id=` and `/s.html?id=` for
+links already in the wild) looks the shelf up the same way the page does and
+rewrites the head with the real `og:`/`twitter:` card — first song title and
+artist, song count, and the first cover the shelf has (Apple Music covers are
+re-requested at 600×600). With no cover it uses `/og-cover.png`, the
+1200×630 card committed at the repo root.
+
+The same Function answers `/supabase-config.js` itself. When a deploy has no
+config file, Pages would serve its SPA fallback there — HTML where a script
+belongs, which the browser refuses to execute and logs as a MIME error — so
+the Function returns real JavaScript instead: the project variables when the
+dashboard has them, the deployed file when it exists, and an empty module when
+there is no cloud config at all. Precedence is the same for the link previews
+and for the page: `env` first, then the file.
 
 - The anon key is only ever read server-side from `env.SUPABASE_URL` /
   `env.SUPABASE_ANON_KEY` (Pages → Settings → Variables) or from the
