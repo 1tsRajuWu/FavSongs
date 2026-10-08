@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "include": ["/*"],
+  "exclude": [
+    "/index.html",
+    "/song.html",
+    "/saved.html",
+    "/legal.html",
+    "/shelf.html",
+    "/fonts/*",
+    "/logos/*",
+    "/fonts.css",
+    "/styles.css",
+    "/site.js",
+    "/store.js",
+    "/shelf.js",
+    "/shared.js",
+    "/cloud.js",
+    "/likes.js",
+    "/saved.js",
+    "/supabase-config.js",
+    "/icon.svg",
+    "/wordmark.svg",
+    "/og-cover.png",
+    "/loop.mp4",
+    "/robots.txt"
+  ]
+}

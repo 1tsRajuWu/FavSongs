@@ -1,15 +1,29 @@
-/* FavSongs site — Cloudflare Pages security headers */
-/
+/* FavSongs site — Cloudflare Pages security headers.
+ *
+ * Type, the shelf mark, the service logos and the loop video are all served from
+ * this origin. What stays external is public music data fetched by the browser:
+ * iTunes Search (artwork + 30-second previews on a separate audio host), Deezer,
+ * lyrics.ovh, the Spotify/YouTube oEmbed endpoints used when importing a link,
+ * and Supabase for the optional cloud shelf.
+ *
+ * Scripts and connections are pinned to named hosts; images and audio previews
+ * come from per-track CDNs, so those two directives allow any HTTPS origin.
+ */
+/*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
-  Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://esm.sh; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://itunes.apple.com https://api.deezer.com https://open.spotify.com https://www.youtube.com https://cdn.simpleicons.org https://www.cloudflare.com https://api.lyrics.ovh https://ipapi.co; img-src 'self' data: https:; media-src https:; frame-src 'none'; font-src 'self' data:
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'none'; frame-ancestors 'none'; frame-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://esm.sh; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://itunes.apple.com https://api.deezer.com https://api.lyrics.ovh https://open.spotify.com https://www.youtube.com; img-src 'self' data: https:; media-src 'self' https:; font-src 'self'
 /song.html
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
 /index.html
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+/s.html
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin

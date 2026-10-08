@@ -1,98 +1,415 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>FavSongs — your favourite music, shareable</title>
-    <meta name="description" content="Save your favourite songs, import from Spotify, Apple Music and YouTube, and share your shelf with one link." />
-    <link rel="canonical" href="https://favsongs.pages.dev/" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ffb020'/%3E%3Cpath d='M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z' fill='%230b0a08'/%3E%3Ccircle cx='23' cy='8.6' r='2' fill='%230b0a08' opacity='.5'/%3E%3C/svg%3E" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css" />
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>FavSongs — keep the songs you love, share them as one link</title>
+<meta name="description" content="A shelf in your browser: add the songs you love, import from Spotify, Apple Music or YouTube, then send the whole thing as one link. Nothing is uploaded." />
+<link rel="canonical" href="https://favsongs.pages.dev/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FavSongs" />
+<meta property="og:title" content="FavSongs — keep the songs you love, share them as one link" />
+<meta property="og:description" content="A shelf in your browser: add the songs you love, import from Spotify, Apple Music or YouTube, then send the whole thing as one link." />
+<meta property="og:url" content="https://favsongs.pages.dev/" />
+<meta property="og:image" content="https://favsongs.pages.dev/og-cover.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="FavSongs — keep the songs you love, share them as one link" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="FavSongs — keep the songs you love, share them as one link" />
+<meta name="twitter:description" content="A shelf in your browser: add the songs you love, import from Spotify, Apple Music or YouTube, then send the whole thing as one link." />
+<meta name="twitter:image" content="https://favsongs.pages.dev/og-cover.png" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="fonts.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="home-page">
+<a class="skip-link" href="#main">Skip to content</a>
 
-  </head>
-  <body class="fav-page">
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="fav-top">
-      <div class="fav-top-inner">
-        <a class="fav-brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
-        <nav class="fav-nav" aria-label="Primary">
-          <a href="shelf.html">My shelf</a>
-          <a href="song.html">Sample song</a>
-        </nav>
-        <div class="fav-top-spot">
-          <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
-          <a class="btn btn-sm" href="shelf.html" style="text-decoration:none">My shelf</a>
-          <span id="authArea"></span>
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#shelf">Shelf</a>
+      <a href="#share">One link</a>
+      <a href="saved.html">Kept</a>
+      <a href="#how">How it works</a>
+      <a href="#discover">Discover</a>
+    </nav>
+    <div class="top-spot">
+      <span id="authArea"></span>
+      <a class="btn btn-primary btn-sm top-cta" href="#shelf">Build your shelf</a>
+      <button class="icon-btn" id="menuOpen" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">☰</button>
+    </div>
+  </div>
+</header>
+
+<div id="mobileNav" aria-label="Menu">
+  <div class="sheet-head">
+    <span class="kicker is-plain">menu</span>
+    <button class="icon-btn" id="menuClose" type="button" aria-label="Close menu">✕</button>
+  </div>
+  <a href="#shelf">Shelf</a>
+  <a href="#share">One link</a>
+  <a href="saved.html">Kept</a>
+  <a href="#how">How it works</a>
+  <a href="#discover">Discover</a>
+  <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A sample song</a>
+  <a href="legal.html">Legal</a>
+</div>
+<div id="mobileBackdrop"></div>
+
+<main id="main">
+  <!-- ------------------------------------------------------------- hero -->
+  <section class="hero" aria-labelledby="heroTitle">
+    <!-- The mark is the loop itself; the wordmark SVG stays on as the poster,
+         so the art is there before a single byte of video arrives. -->
+    <figure class="mark reveal" aria-label="The FavSongs mark">
+      <video class="loop" id="markVideo" src="loop.mp4" poster="wordmark.svg" muted loop playsinline preload="metadata" aria-label="FavSongs — white serif letters wreathed in red roses and cobalt leaves"></video>
+    </figure>
+
+    <div class="hero-grid">
+      <div class="hero-copy reveal">
+        <p class="kicker">your favourite music, shareable</p>
+        <h1 class="display" id="heroTitle">Keep the songs you love. Send them as <em>one link</em>.</h1>
+        <p class="lede">FavSongs is a shelf that lives in your browser. Add tracks by hand, pull them in from Spotify, Apple Music or YouTube, then send the whole shelf to anyone — the link carries the songs, so nothing is ever uploaded.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#shelf">Build your shelf</a>
+          <a class="btn" id="exampleShelf" href="#shelf">See an example shelf</a>
+        </div>
+        <p class="hero-note">No account needed. Sign in only if you want your shelf synced across devices.</p>
+        <div class="platforms">
+          <span>imports from</span>
+          <img src="logos/spotify.svg" alt="Spotify" width="20" height="20" loading="lazy" />
+          <img src="logos/applemusic.svg" alt="Apple Music" width="20" height="20" loading="lazy" />
+          <img src="logos/youtubemusic.svg" alt="YouTube Music" width="20" height="20" loading="lazy" />
+          <img src="logos/soundcloud.svg" alt="SoundCloud" width="20" height="20" loading="lazy" />
+          <img src="logos/deezer.svg" alt="Deezer" width="20" height="20" loading="lazy" />
         </div>
       </div>
-    </header>
 
-    <main id="main">
-      <section class="fav-hero">
-        <div class="fav-hero-grid">
-          <div>
-            <p class="fav-eyebrow"><i></i> Shareable music shelves</p>
-            <h1>Your favourite music, <span class="grad">shareable</span> — with <em>feeling.</em></h1>
-            <p>Save the songs you love, import from Spotify, Apple Music and YouTube, then share your whole shelf with one link.</p>
-            <div class="fav-cta">
-              <a class="btn btn-primary" href="shelf.html">Build your shelf →</a>
-              <a class="btn" href="shelf.html#p=W3sidCI6ICJHaG9zdCIsICJhIjogIkp1c3RpbiBCaWViZXIiLCAiYWwiOiAiIiwgImFydCI6ICIiLCAidSI6ICJodHRwczovL29wZW4uc3BvdGlmeS5jb20vdHJhY2svNkkzbXFUd2hScG4zNFNMVmFmU0g3RyJ9LCB7InQiOiAiQmxpbmRpbmcgTGlnaHRzIiwgImEiOiAiVGhlIFdlZWtuZCIsICJhbCI6ICJBZnRlciBIb3VycyIsICJhcnQiOiAiIiwgInUiOiAiIn1d">See an example shelf</a>
+      <div class="reveal">
+        <div class="preview">
+          <div class="preview-top">
+            <span class="kicker">a shared shelf</span>
+            <span class="preview-note" id="demoNote">one link</span>
+          </div>
+          <a class="featured featured-big" id="demoCard" href="#shelf">
+            <img id="demoArt" alt="" />
+            <div class="featured-meta">
+              <span class="mini">pinned favourite</span>
+              <h3 id="demoTitle">Ghost</h3>
+              <p id="demoSub">Justin Bieber</p>
+              <span class="go">open the song →</span>
             </div>
-          </div>
-          <div class="hero-stack" id="gardenHeroWrap" aria-hidden="true">
-            <canvas id="gardenHero" style="width:100%;height:100%;display:block"></canvas>
-          </div>
+          </a>
+          <div class="playlist" id="demoRows" style="margin-top:0.8rem"></div>
         </div>
-        <div class="marquee" aria-hidden="true"><div class="marquee-track" id="marqueeTrack"></div></div>
-      </section>
+      </div>
+    </div>
+  </section>
 
+  <!-- ------------------------------------------------------- the shelf -->
+  <section class="sec" id="shelf" aria-labelledby="shelfHeading">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">your shelf</p>
+        <h2 id="shelfHeading">Everything you keep, on one shelf.</h2>
+        <p>Add a song, paste a link, or open a shelf someone sent you. Your shelf stays in this browser.</p>
+      </div>
+      <a class="btn btn-sm" href="#how">How it works</a>
+    </div>
 
+    <div id="sharedBar" hidden>
+      <span id="sharedNote" class="share-note">Shared with you.</span>
+      <div class="share-actions">
+        <button class="btn btn-sm btn-primary" id="playSharedBtn" type="button">Play the first</button>
+        <button class="btn btn-sm" id="saveAllBtn" type="button">Save all to my shelf</button>
+        <button class="btn btn-sm btn-ghost" id="keepBtn" type="button">Keep this shelf</button>
+        <button class="btn btn-sm btn-ghost" id="dismissSharedBtn" type="button">Dismiss</button>
+      </div>
+      <span class="share-note" id="sharedStatus" hidden aria-live="polite"></span>
+    </div>
 
-
-
-
-
-
-
-
-      <footer class="fav-foot">
-        <div class="fav-foot-grid">
-          <div>
-            <b>FavSongs</b>
-            <p>Shareable music shelves. Your songs live in your browser — links carry everything.</p>
-          </div>
-          <nav aria-label="Product">
-            <b>Product</b>
-            <a href="shelf.html">Your shelf</a>
-            <a href="song.html">Sample song</a>
-          </nav>
-          <nav aria-label="Legal">
-            <b>Legal</b>
-            <a href="legal.html#privacy">Privacy Policy</a>
-            <a href="legal.html#terms">Terms of Use</a>
-            <a href="legal.html#license">License</a>
-            <a href="legal.html#contact">Contact</a>
-          </nav>
+    <div class="panel" id="addBox">
+      <div class="fields">
+        <div class="field">
+          <label for="fTitle">Song title</label>
+          <input id="fTitle" name="title" type="text" maxlength="120" autocomplete="off" placeholder="Night Dancer" />
         </div>
-        <p class="fav-copy">© 2026 FavSongs — shelves live in your browser, nothing is uploaded.</p>
-      </footer>
-    </main>
+        <div class="field">
+          <label for="fArtist">Artist</label>
+          <input id="fArtist" name="artist" type="text" maxlength="120" autocomplete="off" placeholder="imase" />
+        </div>
+        <div class="field">
+          <label for="fLink">Listen link <span class="muted">(optional)</span></label>
+          <input id="fLink" name="link" type="url" maxlength="300" inputmode="url" autocomplete="off" placeholder="https://open.spotify.com/track/…" />
+        </div>
+        <div class="field">
+          <label for="fArt">Artwork URL <span class="muted">(optional)</span></label>
+          <input id="fArt" name="art" type="url" maxlength="300" inputmode="url" autocomplete="off" placeholder="https://…/cover.jpg" />
+        </div>
+      </div>
+      <div class="fav-row">
+        <button class="btn btn-primary" id="addBtn" type="button">Add to shelf</button>
+        <span class="fav-hint">Saved in this browser only</span>
+      </div>
+      <div class="fav-row">
+        <div class="field grow">
+          <label for="importLink">Or paste a track link to fill the fields</label>
+          <input id="importLink" type="url" maxlength="300" inputmode="url" autocomplete="off" placeholder="Spotify, YouTube or Apple Music link" />
+        </div>
+        <button class="btn" id="importBtn" type="button">Import details</button>
+      </div>
+      <span id="importHint" class="fav-hint" aria-live="polite"></span>
+    </div>
 
-    <script src="site.js"></script>
-    <script src="garden-hero.js"></script>
-    <script>
-      (() => {
-        "use strict";
-        const mt = document.getElementById("marqueeTrack");
-        if (mt) {
-          const seq = ["Spotify", "Apple Music", "YouTube Music", "YouTube", "SoundCloud", "Deezer"].map((n) => n + "  \u00b7 ").join("");
-          mt.textContent = (seq + seq).repeat(2);
-        }
+    <div class="panel">
+      <div class="preview-top" style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:0.8rem">
+        <h3 id="shelfTitle" class="display-sm" style="font-size:1.25rem">Your shelf</h3>
+        <span class="mini" id="shelfMeta"></span>
+      </div>
 
-    </script>
+      <div class="shelf-empty" id="shelfEmpty">
+        <b>The shelf is empty.</b>
+        <p>Add your first song above — or open an example shelf to see how a shared link looks.</p>
+        <div class="actions">
+          <button class="btn btn-sm" id="emptyExampleBtn" type="button">Open an example shelf</button>
+        </div>
+      </div>
 
-    <script src="supabase-config.js" onerror="this.remove()"></script>
-    <script type="module" src="cloud.js"></script>
+      <div class="shelf-grid" id="shelfGrid"></div>
 
-  </body>
+      <div class="share-row" id="shareRow" hidden>
+        <button class="btn btn-primary" id="shareBtn" type="button">Share my shelf</button>
+        <span class="share-note">One link, the whole shelf.</span>
+      </div>
+      <div class="share-box" id="shareBox" hidden>
+        <div class="share-btns">
+          <input id="shareLink" type="text" readonly aria-label="Your shelf link" />
+          <button class="btn btn-sm" id="shareCopyBtn" type="button">Copy</button>
+        </div>
+      </div>
+      <span id="shareHint" class="fav-hint" aria-live="polite"></span>
+
+      <div class="toggles">
+        <span id="publicWrap" hidden>
+          <label><input type="checkbox" id="publicToggle" /> List my shelf in Discover</label>
+        </span>
+        <button class="btn btn-sm btn-ghost" id="syncBtn" type="button" hidden>Sync now</button>
+      </div>
+    </div>
+
+    <div class="playlist-wrap" id="playlistWrap" hidden>
+      <a class="featured featured-big" id="featuredCard" href="#shelf">
+        <img id="featuredArt" alt="" />
+        <div class="featured-meta">
+          <span class="mini">pinned favourite</span>
+          <h3 id="featuredTitle"></h3>
+          <p id="featuredSub"></p>
+          <span class="go">open the song →</span>
+        </div>
+      </a>
+      <div class="playlist" id="playlistRows" style="margin-top:0.8rem"></div>
+    </div>
+  </section>
+
+  <!-- -------------------------------------------------------- one link -->
+  <section class="sec" id="share" aria-labelledby="shareHeading">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">one link</p>
+        <h2 id="shareHeading">The link is the shelf.</h2>
+        <p>Send it in a chat, drop it in a bio, paste it in a message. Whoever opens it sees the same songs, in the same order.</p>
+      </div>
+    </div>
+
+    <div class="link-split">
+      <div class="reveal">
+        <ul class="link-points">
+          <li><span class="dot" aria-hidden="true"></span><span><b>Nothing to upload.</b> The songs travel inside the link itself, so there is no account wall on the other side.</span></li>
+          <li><span class="dot" aria-hidden="true"></span><span><b>Two shapes.</b> A short link from our backend when it is reachable, and a long self-contained link that always works — even offline.</span></li>
+          <li><span class="dot" aria-hidden="true"></span><span><b>Artwork and previews.</b> Rows resolve real covers and 30-second previews in the listener's browser.</span></li>
+          <li><span class="dot" aria-hidden="true"></span><span><b>Optional cloud.</b> Sign in with Google and your shelf follows you between devices; keep it private or list it in Discover.</span></li>
+        </ul>
+        <div class="actions" style="margin-top:1.6rem">
+          <a class="btn btn-primary" href="#shelf">Build your shelf</a>
+          <a class="btn" href="song.html?t=Ghost&amp;a=Justin%20Bieber">See a song page</a>
+        </div>
+      </div>
+
+      <figure class="signature reveal">
+        <!-- metadata only: the loop is already cached by the hero above, and
+             having data ready lets this one join the hero's clock instantly -->
+        <video class="loop" id="loopVideo" src="loop.mp4" poster="wordmark.svg" muted loop playsinline preload="metadata" aria-label="The FavSongs shelf mark, blooming"></video>
+      </figure>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------- how it works -->
+  <section class="sec" id="how" aria-labelledby="howHeading">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">how it works</p>
+        <h2 id="howHeading">Three moves.</h2>
+      </div>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <span class="step-num">01 — save</span>
+        <h3>Keep your favourites</h3>
+        <p>Add a title and artist, or paste a track link and let the details fill themselves in.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02 — order</span>
+        <h3>Make it read like a mood</h3>
+        <p>Your shelf keeps its order. The first song becomes the pinned favourite on the shared view.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03 — share</span>
+        <h3>Send one link</h3>
+        <p>Copy the link and hand it over. They can listen, open each song, or save the whole shelf to their own.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- -------------------------------------------------------- discover -->
+  <section class="sec" id="discover" hidden aria-labelledby="discoverHeading">
+    <div class="sec-head">
+      <div>
+        <p class="kicker">discover</p>
+        <h2 id="discoverHeading">Public shelves</h2>
+        <p>Shelves people chose to list. Open one and it saves to yours in a click.</p>
+      </div>
+    </div>
+    <div class="discover-grid" id="discoverGrid"></div>
+  </section>
+
+  <footer class="foot">
+    <div class="foot-inner">
+      <div class="foot-grid">
+        <div>
+          <b>FavSongs</b>
+          <p>Shareable music shelves. Your songs live in your browser and the link carries everything — nothing is uploaded.</p>
+        </div>
+        <nav aria-label="Product">
+          <b>Product</b>
+          <a href="#shelf">Your shelf</a>
+          <a href="#share">One link</a>
+          <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A song page</a>
+        </nav>
+        <nav aria-label="Legal">
+          <b>Legal</b>
+          <a href="legal.html#privacy">Privacy Policy</a>
+          <a href="legal.html#terms">Terms of Use</a>
+          <a href="legal.html#license">License</a>
+          <a href="legal.html#contact">Contact</a>
+        </nav>
+      </div>
+    </div>
+    <p class="foot-copy">© <span data-year>2026</span> FavSongs — shelves live in your browser, nothing is uploaded.</p>
+  </footer>
+</main>
+
+<script src="site.js"></script>
+<script src="shared.js"></script>
+<script src="store.js"></script>
+<script src="shelf.js"></script>
+<script src="supabase-config.js" onerror="this.remove()"></script>
+<script type="module" src="cloud.js"></script>
+<script>
+  /* Hero preview: the real shared-shelf components, fed a small demo list and
+     real artwork. Dropped from the promo card if the renderer is missing. */
+  (() => {
+    const mount = {
+      featuredCard: document.getElementById("demoCard"),
+      featuredArt: document.getElementById("demoArt"),
+      featuredTitle: document.getElementById("demoTitle"),
+      featuredSub: document.getElementById("demoSub"),
+      rowsEl: document.getElementById("demoRows"),
+    };
+    if (!window.SharedList || !mount.rowsEl) return;
+    const demo = [
+      { t: "Ghost", a: "Justin Bieber", u: "https://open.spotify.com/track/6I3mqTwhRpn34SLVafSH7G" },
+      { t: "Blinding Lights", a: "The Weeknd", al: "After Hours" },
+      { t: "Dreams", a: "Fleetwood Mac", al: "Rumours" },
+      { t: "Night Dancer", a: "imase" },
+      { t: "Sunflower", a: "Post Malone, Swae Lee", al: "Spider-Man: Into the Spider-Verse" },
+    ];
+    window.SharedList.renderPlaylist(mount, demo, {});
+    const note = document.getElementById("demoNote");
+    if (note) note.textContent = demo.length + " songs · one link";
+  })();
+
+  /* Each loop only plays once it is actually on screen, so the 4 MB file never
+     blocks the first paint, and the two instances share one clock: the hero is
+     the clock, so the mark sits at the same point in the bloom wherever it is
+     on the page. Drift is corrected on timeupdate (a few times a second)
+     rather than per frame, measured the short way round the loop so a wrap is
+     not mistaken for drift. Reduced motion keeps the poster instead. */
+  (() => {
+    const vids = [...document.querySelectorAll("video.loop")];
+    if (!vids.length || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const TOL = 0.12;       // seconds of drift worth a seek
+    const COOLDOWN = 600;   // ms after a seek before the next one
+    const WAIT = 1200;      // ms a follower waits for the clock before starting
+    const lastSeek = new WeakMap();
+    const leading = () => vids.find((v) => !v.paused && v.readyState > 1);
+
+    // Shortest distance round the loop: 6.9s apart on a 7s loop is 0.1s apart.
+    const drift = (v, lead) => {
+      const dur = lead.duration || 7;
+      let d = v.currentTime - lead.currentTime;
+      if (d > dur / 2) d -= dur;
+      else if (d < -dur / 2) d += dur;
+      return d;
+    };
+
+    const align = (lead) => {
+      for (const v of vids) {
+        if (v === lead || v.paused || v.seeking || v.readyState < 2) continue;
+        if (Math.abs(drift(v, lead)) <= TOL) continue;
+        if (Date.now() - (lastSeek.get(v) || 0) < COOLDOWN) continue;
+        lastSeek.set(v, Date.now());
+        try { v.currentTime = lead.currentTime; } catch { /* not seekable yet */ }
+      }
+    };
+
+    const join = (v, waited) => {
+      const lead = leading();
+      // The hero leads; a follower would rather wait a moment than start the
+      // bloom over from zero while the clock is still starting up.
+      if (!lead && v !== vids[0] && waited < WAIT) {
+        setTimeout(() => join(v, waited + 200), 200);
+        return;
+      }
+      if (lead && lead !== v) {
+        lastSeek.set(v, Date.now());
+        try { v.currentTime = lead.currentTime; } catch { /* ignore */ }
+      }
+      if (v.play) v.play().catch(() => {});
+    };
+
+    const start = (v) => {
+      if (v.readyState >= 2) { join(v, WAIT); return; }
+      // A seek made before any frame exists is simply dropped, so wake the file
+      // up first and join the clock as soon as there is something to seek into.
+      v.preload = "auto";
+      v.addEventListener("loadeddata", () => join(v, 0), { once: true });
+      v.load();
+    };
+
+    const onTick = () => { const lead = leading(); if (lead) align(lead); };
+    vids.forEach((v) => v.addEventListener("timeupdate", onTick));
+
+    if (!("IntersectionObserver" in window)) { vids.forEach((v) => start(v)); return; }
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.isIntersecting) { start(e.target); io.unobserve(e.target); }
+      }
+    }, { rootMargin: "700px 0px" });   // wake a loop before it is on screen,
+    vids.forEach((v) => io.observe(v)); // so it joins the clock already running
+  })();
+</script>
+</body>
 </html>

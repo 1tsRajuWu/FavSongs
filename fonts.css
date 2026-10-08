@@ -1,0 +1,8 @@
+/* FavSongs type — self-hosted (no third-party font requests, no FOUT flash).
+ * Onest: UI + body copy (variable). Playfair Display: the display serif, the same
+ * voice as the wordmark. DM Mono: kickers, counts and link metadata. */
+@font-face{font-family:'Onest';font-style:normal;font-weight:100 900;font-display:swap;src:url(fonts/onest.woff2) format('woff2');}
+@font-face{font-family:'Playfair Display';font-style:normal;font-weight:400 800;font-display:swap;src:url(fonts/playfair.woff2) format('woff2');}
+@font-face{font-family:'Playfair Display';font-style:italic;font-weight:400 800;font-display:swap;src:url(fonts/playfair-italic.woff2) format('woff2');}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/dmmono-400.woff2) format('woff2');}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/dmmono-500.woff2) format('woff2');}

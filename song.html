@@ -7,428 +7,25 @@
     <meta name="description" content="A song shared from FavSongs — play a preview and open it on Spotify, Apple Music, YouTube Music and more." />
     <link rel="canonical" href="https://favsongs.pages.dev/song" />
     <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="fonts.css" />
     <link rel="stylesheet" href="styles.css" />
-    <style>
-      body.song-page {
-        min-height: 100svh;
-        display: flex;
-        flex-direction: column;
-      }
-      .song-stage {
-        position: relative;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        overflow: clip;
-        padding: clamp(2.5rem, 6vw, 4rem) var(--rail) 1rem;
-      }
-      /* living album backdrop */
-      .album-bg {
-        position: absolute;
-        inset: -6%;
-        background-size: cover;
-        background-position: center;
-        filter: blur(70px) saturate(1.5) brightness(0.42);
-        animation: kenburns 26s ease-in-out infinite alternate;
-        pointer-events: none;
-        transition: opacity 1.2s var(--ease);
-      }
-      @keyframes kenburns {
-        from { transform: scale(1) translate3d(0, 0, 0); }
-        to { transform: scale(1.14) translate3d(-2%, 2%, 0); }
-      }
-      .album-veil {
-        position: absolute;
-        inset: 0;
-        background:
-          radial-gradient(110% 55% at 50% 30%, transparent 55%, var(--bg) 94%),
-          linear-gradient(to bottom, rgba(0, 0, 0, 0.12), transparent 32%, var(--bg) 97%);
-        pointer-events: none;
-      }
-      .orb {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(90px);
-        opacity: 0.55;
-        pointer-events: none;
-        animation: drift 14s ease-in-out infinite alternate;
-      }
-      .orb-a {
-        width: min(56vw, 520px);
-        height: min(56vw, 520px);
-        left: -12vw;
-        top: -6vh;
-        background: radial-gradient(circle, var(--glow-amber), transparent 62%);
-      }
-      .orb-b {
-        width: min(48vw, 440px);
-        height: min(48vw, 440px);
-        right: -10vw;
-        top: 22vh;
-        background: radial-gradient(circle, var(--glow-coral), transparent 62%);
-        animation-delay: -7s;
-      }
-      @keyframes drift {
-        from { transform: translate3d(0, 0, 0) scale(1); }
-        to { transform: translate3d(4vw, 3vh, 0) scale(1.12); }
-      }
-      /* centered hero, bottom-left title block */
-      .song-hero {
-        position: relative;
-        width: 100%;
-        max-width: 640px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        animation: rise 0.7s var(--ease) both;
-      }
-      @keyframes rise {
-        from { opacity: 0; transform: translateY(26px); }
-        to { opacity: 1; transform: none; }
-      }
-      .song-art {
-        width: min(270px, 62vw);
-        aspect-ratio: 1;
-        border-radius: 28px;
-        object-fit: cover;
-        border: 1px solid var(--line-strong);
-        box-shadow:
-          inset 0 1px 0 rgba(255, 255, 255, 0.12),
-          0 24px 80px rgba(0, 0, 0, 0.55),
-          0 0 90px -10px var(--glow-amber);
-        background: var(--surface-2);
-        animation: floaty 7s ease-in-out infinite;
-      }
-      @keyframes floaty {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-9px); }
-      }
-      .song-meta {
-        width: 100%;
-        max-width: 560px;
-        text-align: left;
-        margin: 1.5rem auto 0;
-      }
-      .song-eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        font-size: 0.76rem;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--ink-faint);
-        margin: 1.4rem 0 0.55rem;
-        padding: 0.32rem 0.75rem;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-      .song-eyebrow .pulse {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--mint);
-        box-shadow: 0 0 10px var(--mint);
-        animation: blink 1.8s ease-in-out infinite;
-      }
-      @keyframes blink {
-        50% { opacity: 0.35; }
-      }
-      .song-title {
-        font-size: clamp(2rem, 5vw, 3.1rem);
-        line-height: 1.04;
-        margin: 0 0 0.4rem;
-        letter-spacing: -0.025em;
-        text-wrap: balance;
-      }
-      .song-sub {
-        color: var(--ink-dim);
-        font-size: 1.06rem;
-        margin: 0 0 1.2rem;
-      }
-      /* glass player */
-      .player {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        gap: 0.9rem;
-        padding: 0.7rem 0.9rem;
-        border-radius: 20px;
-        border: 1px solid var(--line-strong);
-        background: linear-gradient(165deg, rgba(255, 248, 235, 0.1), rgba(255, 248, 235, 0.03));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), var(--shadow-card);
-        backdrop-filter: blur(20px) saturate(1.3);
-        -webkit-backdrop-filter: blur(20px) saturate(1.3);
-        margin-bottom: 1rem;
-        animation: rise 0.6s var(--ease) 0.1s both;
-      }
-      .player[hidden] {
-        display: none;
-      }
-      .play-btn {
-        flex: none;
-        align-self: center;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        border: none;
-        cursor: pointer;
-        display: grid;
-        place-items: center;
-        color: #0b0a08;
-        background: linear-gradient(135deg, var(--amber), var(--amber-deep));
-        box-shadow: 0 8px 26px var(--glow-amber);
-        transition: transform 0.2s var(--ease);
-      }
-      .play-btn:hover { transform: scale(1.06); }
-      .play-btn:active { transform: scale(0.96); }
-      .play-btn svg { width: 18px; height: 18px; }
-      .eq {
-        flex: none;
-        align-self: center;
-        display: flex;
-        align-items: flex-end;
-        gap: 3px;
-        height: 22px;
-      }
-      .eq i {
-        width: 3px;
-        border-radius: 2px;
-        background: var(--ink-faint);
-        height: 30%;
-      }
-      .player.playing .eq i {
-        background: var(--amber);
-        animation: eq 0.9s ease-in-out infinite;
-      }
-      .player.playing .eq i:nth-child(2) { animation-delay: -0.3s; }
-      .player.playing .eq i:nth-child(3) { animation-delay: -0.6s; }
-      .player.playing .eq i:nth-child(4) { animation-delay: -0.15s; }
-      @keyframes eq {
-        0%, 100% { height: 25%; }
-        50% { height: 100%; }
-      }
-      .track {
-        flex: 1;
-        min-width: 0;
-        cursor: pointer;
-      }
-      .track-bar {
-        height: 5px;
-        border-radius: 3px;
-        background: rgba(255, 255, 255, 0.12);
-        overflow: hidden;
-      }
-      .track-fill {
-        height: 100%;
-        width: 0%;
-        border-radius: 3px;
-        background: linear-gradient(90deg, var(--amber), var(--coral));
-      }
-      .track-meta {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 0.3rem;
-        font-size: 0.72rem;
-        color: var(--ink-faint);
-        font-variant-numeric: tabular-nums;
-      }
-      .player-loading {
-        flex: 1;
-        height: 12px;
-        border-radius: 6px;
-        background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.14) 50%, rgba(255,255,255,0.06) 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.2s linear infinite;
-      }
-      @keyframes shimmer {
-        to { background-position: -200% 0; }
-      }
-      .song-direct {
-        margin-bottom: 0.4rem;
-        animation: rise 0.6s var(--ease) 0.16s both;
-      }
-      .song-direct .btn {
-        background: linear-gradient(135deg, var(--amber), var(--amber-deep));
-        border: none;
-        box-shadow: 0 10px 34px var(--glow-amber);
-      }
-      /* service grid */
-      .svc-grid-label {
-        position: relative;
-        max-width: 860px;
-        width: 100%;
-        margin: 1.7rem auto 0;
-        text-align: center;
-        font-size: 0.78rem;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--ink-faint);
-        animation: rise 0.6s var(--ease) 0.2s both;
-      }
-      .svc.unavail { opacity: 0.42; }
-      .svc.unavail:hover { transform: none; }
-      .svc .na-tag {
-        margin-left: auto; font-size: 0.6rem; font-weight: 800;
-        letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap;
-        color: var(--ink-faint); border: 1px solid var(--line);
-        padding: 0.12rem 0.42rem; border-radius: 999px; flex: none;
-      }
-      .verify-note {
-        max-width: 860px; width: 100%; margin: 0.4rem auto 0; padding: 0;
-        color: var(--ink-faint); font-size: 0.85rem; text-align: center;
-      }
-      .svc-grid {
-        position: relative;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 0.7rem;
-        max-width: 860px;
-        width: 100%;
-        margin: 0.8rem auto 0;
-        padding: 0 0 0.4rem;
-      }
-      .svc {
-        --svc: #a684ff;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.55rem;
-        padding: 1.1rem 0.8rem 0.95rem;
-        text-align: center;
-        border-radius: var(--r);
-        border: 1px solid var(--line);
-        background: linear-gradient(165deg, rgba(255, 248, 235, 0.07), rgba(255, 248, 235, 0.02));
-        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        color: var(--ink);
-        text-decoration: none;
-        font-weight: 650;
-        overflow: hidden;
-        animation: rise 0.6s var(--ease) both;
-        transition:
-          transform 0.22s var(--ease),
-          border-color 0.25s var(--ease),
-          box-shadow 0.3s var(--ease),
-          background 0.3s var(--ease);
-      }
-      .svc:nth-child(1) { animation-delay: 0.22s; }
-      .svc:nth-child(2) { animation-delay: 0.28s; }
-      .svc:nth-child(3) { animation-delay: 0.34s; }
-      .svc:nth-child(4) { animation-delay: 0.4s; }
-      .svc:nth-child(5) { animation-delay: 0.46s; }
-      .svc:nth-child(6) { animation-delay: 0.52s; }
-      .svc::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.14) 50%, transparent 60%);
-        transform: translateX(-110%);
-        transition: transform 0.6s var(--ease);
-        pointer-events: none;
-      }
-      .svc:hover,
-      .svc:focus-visible {
-        transform: translateY(-3px) scale(1.015);
-        border-color: var(--svc);
-        box-shadow:
-          inset 0 1px 0 rgba(255, 255, 255, 0.12),
-          0 14px 40px -10px var(--svc-glow, var(--svc)),
-          0 0 0 1px var(--svc) inset;
-        background: linear-gradient(165deg, var(--svc-tint, rgba(255, 255, 255, 0.08)), rgba(255, 248, 235, 0.02));
-        outline: none;
-      }
-      .svc:hover::after {
-        transform: translateX(110%);
-      }
-      .svc .logo-tile {
-        display: grid;
-        place-items: center;
-        width: 52px;
-        height: 52px;
-        flex: none;
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid var(--line);
-        transition: background 0.3s var(--ease), box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
-      }
-      .svc:hover .logo-tile,
-      .svc:focus-visible .logo-tile {
-        background: var(--svc);
-        box-shadow: 0 0 22px -2px var(--svc);
-        transform: scale(1.06) rotate(-4deg);
-      }
-      .svc:hover .logo-tile img,
-      .svc:focus-visible .logo-tile img {
-        filter: brightness(0) invert(1);
-      }
-      .svc img {
-        width: 28px;
-        height: 28px;
-        display: block;
-        transition: filter 0.25s var(--ease);
-      }
-      .svc .svc-name {
-        position: absolute;
-        width: 1px; height: 1px;
-        overflow: hidden;
-        clip-path: inset(50%);
-        white-space: nowrap;
-      }
-      .song-foot {
-        position: relative;
-        text-align: center;
-        color: var(--ink-faint);
-        padding: 1.2rem var(--rail) 1.6rem;
-        font-size: 0.88rem;
-      }
-      .song-foot nav {
-        margin: 0.9rem auto 0;
-        display: inline-flex;
-        gap: 0.25rem;
-        align-items: center;
-        padding: 0.4rem 0.5rem;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-      }
-      .song-foot nav a {
-        color: var(--ink-dim);
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 0.82rem;
-        padding: 0.35rem 0.8rem;
-        border-radius: 999px;
-      }
-      .song-foot nav a:hover {
-        color: var(--ink);
-        background: rgba(255, 255, 255, 0.06);
-      }
-      .song-empty {
-        text-align: center;
-        padding: 5rem var(--rail);
-        color: var(--ink-dim);
-      }
-      [hidden] {
-        display: none !important;
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .album-bg, .orb, .song-art, .song-hero, .svc, .song-eyebrow .pulse, .player .eq i {
-          animation: none !important;
-        }
-        .svc { transform: none !important; }
-      }
-    </style>
-  </head>
+      </head>
   <body class="song-page">
     <a class="skip-link" href="#main">Skip to content</a>
+    <header class="top">
+      <div class="top-inner">
+        <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+        <nav class="nav" aria-label="Primary">
+          <a href="index.html#shelf">Shelf</a>
+          <a href="index.html#share">One link</a>
+          <a href="saved.html">Kept</a>
+          <a href="song.html" aria-current="page">A song</a>
+        </nav>
+        <div class="top-spot">
+          <a class="btn btn-sm top-cta" href="index.html#shelf">Build your shelf</a>
+        </div>
+      </div>
+    </header>
 
     <main id="main" class="song-stage">
       <div class="album-bg" id="albumBg" aria-hidden="true"></div>
@@ -438,7 +35,9 @@
 
       <section class="song-hero" id="songHero" hidden>
         <div class="song-main">
-        <img class="song-art" id="songArt" alt="Song artwork" />
+        <div class="song-art-frame">
+          <img class="song-art" id="songArt" alt="Song artwork" />
+        </div>
         <div class="song-meta">
           <p class="song-eyebrow"><span class="pulse"></span> Shared via FavSongs</p>
           <h1 class="song-title" id="songTitle"></h1>
@@ -473,9 +72,13 @@
       </section>
 
       <div class="song-empty" id="songEmpty" hidden>
+        <p class="kicker">shared songs</p>
         <h1>No song here yet.</h1>
-        <p>Open this page from a shared song link to see the track.</p>
-        <p><a class="btn btn-primary" href="index.html">Make your shelf</a></p>
+        <p>Song pages open from a shared link — a shelf sends them along on its own. Nothing to do here.</p>
+        <div class="actions actions-center">
+          <a class="btn btn-primary" href="index.html#shelf">Make your shelf</a>
+          <a class="btn" href="song.html?t=Ghost&amp;a=Justin%20Bieber">See an example song</a>
+        </div>
       </div>
 
       <div class="song-foot" id="songFoot" hidden>
@@ -488,7 +91,32 @@
       </div>
     </main>
 
+
+    <footer class="foot">
+      <div class="foot-inner">
+        <div class="foot-grid">
+          <div>
+            <b>FavSongs</b>
+            <p>Shareable music shelves. Artwork and previews resolve in your browser from public APIs.</p>
+          </div>
+          <nav aria-label="Product">
+            <b>Product</b>
+            <a href="index.html#shelf">Your shelf</a>
+            <a href="index.html#share">One link</a>
+          </nav>
+          <nav aria-label="Legal">
+            <b>Legal</b>
+            <a href="legal.html#privacy">Privacy Policy</a>
+            <a href="legal.html#terms">Terms of Use</a>
+            <a href="legal.html#license">License</a>
+          </nav>
+        </div>
+      </div>
+      <p class="foot-copy">© <span data-year>2026</span> FavSongs — nothing is uploaded, links carry everything.</p>
+    </footer>
+
     <script src="site.js"></script>
+    <script src="supabase-config.js" onerror="this.remove()"></script>
     <script type="module">
       import { mountLike, songTargetId } from "./likes.js";
       try {
@@ -522,21 +150,23 @@
         const safeArt = /^https:\/\/[^"'<>\s]+$/i.test(art) ? art : "";
         const query = encodeURIComponent([title, artist].filter(Boolean).join(" "));
 
+        // One palette: services are named, never branded with their own colour.
         const SERVICES = [
-          { name: "Spotify", logo: "spotify", color: "#1DB954", url: "https://open.spotify.com/search/" + query, host: "open.spotify.com" },
-          { name: "Apple Music", logo: "apple", color: "#FA243C", url: "https://music.apple.com/us/search?term=" + query, host: "music.apple.com" },
-          { name: "YouTube Music", logo: "ytmusic", color: "#FF0000", url: "https://music.youtube.com/search?q=" + query, host: "music.youtube.com" },
-          { name: "YouTube", logo: "youtube", color: "#FF0000", url: "https://www.youtube.com/results?search_query=" + query, host: "youtube.com" },
-          { name: "SoundCloud", logo: "soundcloud", color: "#FF5500", url: "https://soundcloud.com/search?q=" + query, host: "soundcloud.com" },
-          { name: "Deezer", logo: "deezer", color: "#A238FF", url: "https://www.deezer.com/search/" + query, host: "deezer.com" },
+          { name: "Spotify", logo: "spotify", url: "https://open.spotify.com/search/" + query, host: "open.spotify.com" },
+          { name: "Apple Music", logo: "apple", url: "https://music.apple.com/us/search?term=" + query, host: "music.apple.com" },
+          { name: "YouTube Music", logo: "ytmusic", url: "https://music.youtube.com/search?q=" + query, host: "music.youtube.com" },
+          { name: "YouTube", logo: "youtube", url: "https://www.youtube.com/results?search_query=" + query, host: "youtube.com" },
+          { name: "SoundCloud", logo: "soundcloud", url: "https://soundcloud.com/search?q=" + query, host: "soundcloud.com" },
+          { name: "Deezer", logo: "deezer", url: "https://www.deezer.com/search/" + query, host: "deezer.com" },
         ];
+        // Self-hosted, single-colour marks: one ink, no brand greens or purples.
         const LOGOS = {
-          spotify: "https://cdn.simpleicons.org/spotify",
-          apple: "https://cdn.simpleicons.org/applemusic",
-          ytmusic: "https://cdn.simpleicons.org/youtubemusic",
-          youtube: "https://cdn.simpleicons.org/youtube",
-          soundcloud: "https://cdn.simpleicons.org/soundcloud",
-          deezer: "https://cdn.simpleicons.org/deezer",
+          spotify: "logos/spotify.svg",
+          apple: "logos/applemusic.svg",
+          ytmusic: "logos/youtubemusic.svg",
+          youtube: "logos/youtube.svg",
+          soundcloud: "logos/soundcloud.svg",
+          deezer: "logos/deezer.svg",
         };
 
         document.getElementById("songTitle").textContent = title;
@@ -546,71 +176,21 @@
 
         const artEl = document.getElementById("songArt");
         const bgEl = document.getElementById("albumBg");
+        // No source means no <img> at all — the frame stays a quiet panel, so
+        // a broken-image glyph can never appear in the middle of the hero.
+        artEl.addEventListener("error", () => artEl.removeAttribute("src"));
         function setCover(url) {
-          artEl.crossOrigin = "anonymous";
-          artEl.src = url;
-          bgEl.style.backgroundImage = 'url("' + url.replace(/"/g, "") + '")';
-          artEl.addEventListener("load", () => applyAlbumTheme(artEl), { once: true });
+          // No crossOrigin here: nothing samples this cover's pixels, and some
+          // cover CDNs send no CORS header, which would otherwise hide the art.
+          const probe = new Image();
+          probe.onload = () => {
+            artEl.src = url;
+            bgEl.style.backgroundImage = 'url("' + url.replace(/"/g, "") + '")';
+          };
+          probe.src = url;
         }
-        if (safeArt) {
-          setCover(safeArt);
-        } else {
-          artEl.src = "icon.svg";
-        }
+        if (safeArt) setCover(safeArt);
 
-        /**
-         * Sample the cover down to a few pixels and re-theme the page around
-         * the two strongest hues (orbs, buttons, accents). Fails silent —
-         * cross-origin art without CORS headers keeps the default theme.
-         */
-        function applyAlbumTheme(img) {
-          try {
-            const SIZE = 48;
-            const canvas = document.createElement("canvas");
-            canvas.width = SIZE;
-            canvas.height = SIZE;
-            const ctx = canvas.getContext("2d", { willReadFrequently: true });
-            if (!ctx) return;
-            ctx.drawImage(img, 0, 0, SIZE, SIZE);
-            const data = ctx.getImageData(0, 0, SIZE, SIZE).data;
-            let r1 = 0, g1 = 0, b1 = 0, n1 = 0;
-            let r2 = 0, g2 = 0, b2 = 0, n2 = 0;
-            let best = -1;
-            for (let i = 0; i < data.length; i += 16) {
-              const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
-              if (a < 128) continue;
-              const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
-              const sat = mx === 0 ? 0 : (mx - mn) / mx;
-              const score = sat * (0.35 + 0.65 * (mx / 255));
-              r2 += r; g2 += g; b2 += b; n2++;
-              if (score > best && sat > 0.18 && mx > 40) {
-                best = score;
-                r1 = r; g1 = g; b1 = b; n1 = 1;
-              }
-            }
-            if (n2 === 0) return;
-            const avg = [r2 / n2, g2 / n2, b2 / n2].map(Math.round);
-            const vib = n1 ? [r1, g1, b1] : avg;
-            const root = document.documentElement;
-            const css = (c) => "rgb(" + c[0] + "," + c[1] + "," + c[2] + ")";
-            const rgba = (c, al) => "rgba(" + c[0] + "," + c[1] + "," + c[2] + "," + al + ")";
-            const dark = (c, f) => c.map((v) => Math.round(v * f));
-            const light = root.dataset.theme === "light";
-            // Solid cover-tinted base (Spotify-fullscreen style): darken the
-            // average for dark mode, lift it toward paper for light mode.
-            const base = light ? avg.map((v) => Math.round(v + (255 - v) * 0.88)) : dark(avg, 0.32);
-            root.style.setProperty("--bg", css(base));
-            root.style.setProperty("--bg-soft", css(light ? base : dark(avg, 0.26)));
-            document.getElementById("albumBg").style.opacity = "0.35";
-            root.style.setProperty("--amber", css(vib));
-            root.style.setProperty("--amber-deep", css(dark(vib, 0.62)));
-            root.style.setProperty("--coral", css(avg));
-            root.style.setProperty("--glow-amber", rgba(vib, 0.3));
-            root.style.setProperty("--glow-coral", rgba(avg, 0.22));
-          } catch {
-            /* tainted canvas / no CORS — keep the default theme */
-          }
-        }
 
         // Saved direct link (e.g. the exact Spotify track) gets top billing.
         // Its service counts as verified-present no matter what lookups say.
@@ -636,9 +216,6 @@
           link.rel = "noopener";
           link.setAttribute("aria-label", s.name + (exact ? " (exact track)" : ""));
           link.dataset.svc = s.name;
-          link.style.setProperty("--svc", s.color);
-          link.style.setProperty("--svc-glow", s.color + "55");
-          link.style.setProperty("--svc-tint", s.color + "22");
           const tile = document.createElement("span");
           tile.className = "logo-tile";
           tile.setAttribute("aria-hidden", "true");
@@ -699,9 +276,10 @@
           noLyrics("No artist attached, so lyrics can't be looked up here — Genius search usually has it.");
         }
 
-        // --- Availability: gray out what isn't there ---
-        // Apple Music is verified exactly via iTunes; the saved direct link
-        // verifies its own service. Anything else is an honest live search.
+        // --- Availability: only say "not here" when a store really answered ---
+        // Apple Music is checked exactly via iTunes, and a saved direct link
+        // proves its own service. A lookup that failed or was blocked counts as
+        // unchecked — never as missing — so the tile stays a plain search link.
         function normStr(s) {
           return String(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
         }
@@ -723,24 +301,17 @@
               normStr(artist).includes(normStr(gotArtist).slice(0, 8)))
           );
         }
-        function applyAvailability(hit, dzHit) {
-          const appleOk = !!hit || directService === "Apple Music";
-          const deezerOk = !!dzHit || directService === "Deezer";
-          if (!hit && !dzHit && !directService) {
-            // Nothing matched anywhere — every search is best-effort.
-            for (const s of SERVICES) markUnavailable(s.name);
+        function applyAvailability(apple, deezer) {
+          // true = found · false = the store answered with no match · null = couldn't check
+          if (apple === false) markUnavailable("Apple Music");
+          if (deezer === false) markUnavailable("Deezer");
+          if (apple === null && deezer === null) {
             const note = document.createElement("p");
             note.className = "verify-note";
             note.textContent =
-              "Couldn't verify this track on any service — links below are best-effort searches.";
+              "Couldn't reach the stores just now — the links below are best-effort searches.";
             grid.after(note);
-            return { appleOk: false, deezerOk: false };
           }
-          // iTunes IS Apple Music; Deezer search IS Deezer: no exact match
-          // means not there — unless the saved link proves it directly.
-          if (!appleOk && directService !== "Apple Music") markUnavailable("Apple Music");
-          if (!deezerOk && directService !== "Deezer") markUnavailable("Deezer");
-          return { appleOk, deezerOk };
         }
 
         // --- Playable 30s preview via iTunes Search (no key needed) ---
@@ -770,34 +341,35 @@
         loadingEl.hidden = false;
         const itunes = (term) =>
           fetch("https://itunes.apple.com/search?term=" + term + "&media=music&entity=song&limit=1").then((r) =>
-            r.ok ? r.json() : null,
+            r.ok ? r.json() : Promise.reject(new Error("itunes " + r.status)),
           );
-        // Two independent lookups: iTunes verifies Apple Music, Deezer
-        // verifies Deezer (plus backup cover + preview). Either may fail.
+        // Two independent lookups: iTunes verifies Apple Music, Deezer backs up
+        // cover and preview. Each reports whether it answered at all — Deezer's
+        // API sends no CORS header, so from a page it usually cannot answer.
+        const itunesLookup = itunes(query)
+          .then((data) => (data && data.resultCount > 0 ? data : itunes(encodeURIComponent(title))))
+          .then((data) => ({ checked: true, data }))
+          .catch(() => ({ checked: false, data: null }));
         const deezerLookup = fetch(
           "https://api.deezer.com/search?q=" + query + "&limit=3",
         )
-          .then((r) => (r.ok ? r.json() : null))
-          .then((d) => {
-            const rows = (d && d.data) || [];
-            return (
-              rows.find((r) => exactMatch(r.title || "", (r.artist && r.artist.name) || "")) || null
-            );
-          })
-          .catch(() => null);
-        Promise.all([
-          itunes(query).then((data) =>
-            data && data.resultCount > 0 ? data : itunes(encodeURIComponent(title)),
-          ),
-          deezerLookup,
-        ])
-          .then(([data, dzHit]) => {
+          .then((r) => (r.ok ? r.json() : Promise.reject(new Error("deezer " + r.status))))
+          .then((d) => ({ checked: true, data: d }))
+          .catch(() => ({ checked: false, data: null }));
+        Promise.all([itunesLookup, deezerLookup])
+          .then(([it, dz]) => {
+            const data = it.data;
             const hit = (data && data.results && data.results[0]) || null;
-            const itOk =
-              (!!hit && exactMatch(hit.trackName || "", hit.artistName || "")) ||
-              directService === "Apple Music";
-            const dzOk = !!dzHit || directService === "Deezer";
-            applyAvailability(itOk ? hit : "no-apple", dzOk ? dzHit || {} : null);
+            const rows = (dz.data && dz.data.data) || [];
+            const dzHit =
+              rows.find((r) => exactMatch(r.title || "", (r.artist && r.artist.name) || "")) || null;
+            const apple = directService === "Apple Music"
+              ? true
+              : it.checked
+                ? !!hit && exactMatch(hit.trackName || "", hit.artistName || "")
+                : null;
+            const deezer = directService === "Deezer" ? true : dz.checked ? !!dzHit : null;
+            applyAvailability(apple, deezer);
             const preview = (hit && hit.previewUrl) || (dzHit && dzHit.preview);
             if (!preview) {
               loadingEl.hidden = true;
@@ -826,7 +398,7 @@
             playerEl.hidden = false;
           })
           .catch(() => {
-            loadingEl.hidden = true; // lookups failed — services grid still works
+            loadingEl.hidden = true; // lookups failed — the services grid still works
             applyAvailability(null, null);
           });
 

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Kept shelves — FavSongs</title>
+<meta name="description" content="Every shelf you kept from a shared link, in one place: reopen it, add its songs to your own shelf, or let it go." />
+<link rel="canonical" href="https://favsongs.pages.dev/saved" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FavSongs" />
+<meta property="og:title" content="Kept shelves — FavSongs" />
+<meta property="og:description" content="Every shelf you kept from a shared link, in one place." />
+<meta property="og:url" content="https://favsongs.pages.dev/saved" />
+<meta property="og:image" content="https://favsongs.pages.dev/og-cover.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="FavSongs — keep the songs you love, share them as one link" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Kept shelves — FavSongs" />
+<meta name="twitter:description" content="Every shelf you kept from a shared link, in one place." />
+<meta name="twitter:image" content="https://favsongs.pages.dev/og-cover.png" />
+<meta name="robots" content="noindex" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="fonts.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="kept-page">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html#shelf">Shelf</a>
+      <a href="index.html#share">One link</a>
+      <a href="saved.html" aria-current="page">Kept</a>
+      <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A song</a>
+    </nav>
+    <div class="top-spot">
+      <span id="authArea"></span>
+      <a class="btn btn-primary btn-sm top-cta" href="index.html#shelf">Build your shelf</a>
+      <button class="icon-btn" id="menuOpen" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">☰</button>
+    </div>
+  </div>
+</header>
+
+<div id="mobileNav" aria-label="Menu">
+  <div class="sheet-head">
+    <span class="kicker is-plain">menu</span>
+    <button class="icon-btn" id="menuClose" type="button" aria-label="Close menu">✕</button>
+  </div>
+  <a href="index.html#shelf">Shelf</a>
+  <a href="index.html#share">One link</a>
+  <a href="saved.html" aria-current="page">Kept</a>
+  <a href="index.html#how">How it works</a>
+  <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A sample song</a>
+  <a href="legal.html">Legal</a>
+</div>
+<div id="mobileBackdrop"></div>
+
+<main id="main" class="sec">
+  <div class="sec-head">
+    <div>
+      <p class="kicker">kept shelves</p>
+      <h1 class="display-sm" id="keptHeading">Shelves you kept</h1>
+      <p id="keptMeta">Nothing kept yet.</p>
+    </div>
+    <a class="btn btn-sm" href="index.html#share">How one link works</a>
+  </div>
+
+  <p class="share-note" id="keptNote" hidden aria-live="polite"></p>
+
+  <!-- First run: what keeping a shelf actually does. -->
+  <div class="shelf-empty" id="keptEmpty">
+    <b>No shelves kept yet.</b>
+    <p>Open a shelf someone sent you and press <b class="inline">Keep this shelf</b>. It waits here — songs, order and all — so you can come back to it without finding the link again. Nothing leaves your browser.</p>
+    <div class="actions">
+      <a class="btn btn-sm btn-primary" href="index.html#shelf">Build your own shelf</a>
+      <a class="btn btn-sm" href="index.html#how">See how it works</a>
+    </div>
+  </div>
+
+  <div id="keptList"></div>
+
+  <p class="made-with" style="margin-top:1.6rem">Shelves live in this browser only. <a href="index.html#shelf" style="color:var(--ink)">Your own shelf</a> is a separate list.</p>
+</main>
+
+<footer class="foot">
+  <p class="foot-copy">© <span data-year>2026</span> FavSongs — kept shelves stay on this device.</p>
+</footer>
+
+<script src="site.js"></script>
+<script src="store.js"></script>
+<script src="saved.js"></script>
+</body>
+</html>

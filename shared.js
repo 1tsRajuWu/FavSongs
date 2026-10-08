@@ -38,7 +38,9 @@
     return p;
   }
 
-  // Tint a card from its artwork: sets --ft (featured tint) used by CSS.
+  // The card borrows only *light* from its artwork, never a second colour:
+  // the palette stays black, ink and red, so a green cover can't turn a card
+  // green. Sets --ft (a soft top sheen), used by CSS.
   function tintFromArt(img, card) {
     try {
       const SIZE = 32;
@@ -49,17 +51,17 @@
       if (!ctx) return;
       ctx.drawImage(img, 0, 0, SIZE, SIZE);
       const data = ctx.getImageData(0, 0, SIZE, SIZE).data;
-      let r = 0, g = 0, b = 0, n = 0;
+      let lum = 0, n = 0;
       for (let i = 0; i < data.length; i += 24) {
         if (data[i + 3] < 128) continue;
-        r += data[i]; g += data[i + 1]; b += data[i + 2]; n++;
+        lum += (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
+        n++;
       }
       if (!n) return;
-      r = Math.round(r / n); g = Math.round(g / n); b = Math.round(b / n);
-      card.style.setProperty("--ft", "rgb(" + r + "," + g + "," + b + ")");
-      card.style.setProperty("--ft-glow", "rgba(" + r + "," + g + "," + b + ",0.25)");
+      const a = Math.min(0.2, 0.04 + 0.16 * (lum / n)).toFixed(3);
+      card.style.setProperty("--ft", "rgba(244, 242, 238, " + a + ")");
     } catch {
-      /* tainted canvas — keep default */
+      /* tainted canvas — keep the default sheen */
     }
   }
 
@@ -68,6 +70,12 @@
       img.src = "icon.svg";
       return;
     }
+    // Some cover CDNs send no CORS header. Retry once without it so the art
+    // still shows, just without the sampled sheen.
+    img.addEventListener("error", () => {
+      img.removeAttribute("crossorigin");
+      img.src = url;
+    }, { once: true });
     if (card) {
       img.crossOrigin = "anonymous";
       img.addEventListener("load", () => tintFromArt(img, card), { once: true });
@@ -82,13 +90,14 @@
     return e;
   }
 
+  // Self-hosted, single-colour marks — the same set the song page uses.
   const SVC_LOGO = {
-    "open.spotify.com": "https://cdn.simpleicons.org/spotify",
-    "music.apple.com": "https://cdn.simpleicons.org/applemusic",
-    "music.youtube.com": "https://cdn.simpleicons.org/youtubemusic",
-    "youtube.com": "https://cdn.simpleicons.org/youtube",
-    "soundcloud.com": "https://cdn.simpleicons.org/soundcloud",
-    "deezer.com": "https://cdn.simpleicons.org/deezer",
+    "open.spotify.com": "logos/spotify.svg",
+    "music.apple.com": "logos/applemusic.svg",
+    "music.youtube.com": "logos/youtubemusic.svg",
+    "youtube.com": "logos/youtube.svg",
+    "soundcloud.com": "logos/soundcloud.svg",
+    "deezer.com": "logos/deezer.svg",
   };
   function svcLogo(u) {
     try {

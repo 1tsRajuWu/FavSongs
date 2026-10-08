@@ -6,6 +6,13 @@ name: Deploy FavSongs site (Cloudflare Pages)
 # One-time setup (repo Settings → Secrets and variables → Actions):
 #   CLOUDFLARE_API_TOKEN  — API token with "Cloudflare Pages: Edit" permission
 #   CLOUDFLARE_ACCOUNT_ID — account ID (dash.cloudflare.com sidebar)
+#   SUPABASE_URL          — project URL   (optional; enables cloud sync + short links)
+#   SUPABASE_ANON_KEY     — public anon key (same two values as supabase-config.js)
+#
+# The Supabase pair is written to supabase-config.js for the deploy only: the
+# file is gitignored, and it is what both the page and the /s.html link-preview
+# Function read. Leaving the secrets unset deploys the site with those features
+# off instead of failing the build.
 
 on:
   push:
@@ -13,12 +20,29 @@ on:
     paths:
       - 'index.html'
       - 'song.html'
+      - 's.html'
+      - 'saved.html'
+      - 'shelf.html'
       - 'legal.html'
       - 'styles.css'
+      - 'fonts.css'
+      - 'fonts/**'
+      - 'logos/**'
       - 'site.js'
-      - 'icon.svg'
-      - 'robots.txt'
+      - 'store.js'
+      - 'saved.js'
+      - 'shelf.js'
+      - 'shared.js'
+      - 'cloud.js'
+      - 'likes.js'
+      - 'functions/**'
+      - '_routes.json'
       - '_headers'
+      - 'icon.svg'
+      - 'wordmark.svg'
+      - 'og-cover.png'
+      - 'robots.txt'
+      - 'supabase/**'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -39,6 +63,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Write Supabase config
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::warning::SUPABASE_URL / SUPABASE_ANON_KEY are not set — deploying without supabase-config.js. Cloud sync and short links stay off."
+            exit 0
+          fi
+          printf 'window.FAVSONGS_SUPABASE_URL = "%s";\nwindow.FAVSONGS_SUPABASE_ANON_KEY = "%s";\n' \
+            "$SUPABASE_URL" "$SUPABASE_ANON_KEY" > supabase-config.js
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3

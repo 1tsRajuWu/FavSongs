@@ -1,8 +1,10 @@
 (() => {
   "use strict";
-  const LS_KEY = "favsongs.shelf.v1";
   const SHARE_CAP = 12;
   const $ = (id) => document.getElementById(id);
+  // store.js owns both localStorage keys and is loaded just before this file;
+  // if it ever went missing the shelf shows its empty state rather than crashing.
+  const store = window.FavSongsStore || null;
 
   const escRe = /["'<>\\s]/;
   function cleanStr(s, max) {
@@ -13,15 +15,25 @@
     return /^https:\/\/[^"'<>\s]+$/i.test(s) ? s : "";
   }
 
-  function loadShelf() {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      const arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr.filter((s) => s && s.t) : [];
-    } catch { return []; }
-  }
-  function saveShelf(shelf) {
-    try { localStorage.setItem(LS_KEY, JSON.stringify(shelf)); } catch { /* private mode */ }
+  const loadShelf = () => (store ? store.loadShelf() : []);
+  const saveShelf = (shelf) => { if (store) store.saveShelf(shelf); };
+
+  // Every shelf action says what it did. One line, optionally with a link or an
+  // undo button — the same shape the Kept page uses, so feedback reads alike.
+  function note(message, action) {
+    const el = $("shareHint");
+    if (!el) return;
+    el.textContent = message;
+    if (!action) return;
+    const act = document.createElement(action.href ? "a" : "button");
+    if (action.href) act.href = action.href;
+    else {
+      act.type = "button";
+      act.addEventListener("click", action.run);
+    }
+    act.className = "link-btn";
+    act.textContent = action.label;
+    el.append(" ", act);
   }
 
   function songPageUrl(s) {
@@ -68,16 +80,30 @@
       x.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const shelf = loadShelf().filter((o) => o.id !== s.id);
+        const shelf = loadShelf();
+        const at = shelf.findIndex((o) => o.id === s.id);
+        if (at < 0) return;
+        shelf.splice(at, 1);
         saveShelf(shelf);
         render();
+        // Removing a song is one tap away from a mistake — put it back.
+        note("Removed “" + s.t + "”.", {
+          label: "Undo",
+          run: () => {
+            const back = loadShelf();
+            back.splice(Math.min(at, back.length), 0, s);
+            saveShelf(back);
+            render();
+            note("Put “" + s.t + "” back.");
+          },
+        });
       });
       a.appendChild(x);
     }
     return a;
   }
 
-  function render() {
+  function render(highlight) {
     const shelf = loadShelf();
     const grid = $("shelfGrid");
     grid.innerHTML = "";
@@ -85,19 +111,43 @@
     $("shelfMeta").textContent = shelf.length ? shelf.length + " song" + (shelf.length > 1 ? "s" : "") : "";
     $("shelfEmpty").hidden = shelf.length > 0;
     $("shareRow").hidden = shelf.length === 0;
-    for (const s of shelf) grid.appendChild(cardEl(s, true));
+    for (const s of shelf) {
+      const card = cardEl(s, true);
+      if (highlight && s.id === highlight) card.classList.add("pop");
+      grid.appendChild(card);
+    }
   }
 
+  /* Stable, short identity for a shelf that has no id of its own (FNV-1a). */
+  function hash32(str) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < str.length; i++) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 0x01000193);
+    }
+    return (h >>> 0).toString(36);
+  }
+
+  // The identifier in your link is read aloud, retyped and pasted into a bio,
+  // so it is lowercase only and carries no lookalike glyphs (no 0/O, no 1/l/I).
+  // 8 characters of 31 is ~40 bits: collisions are not a real risk.
+  const ID_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz";
   function shortId() {
-    const abc = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    const buf = new Uint32Array(8);
-    crypto.getRandomValues(buf);
-    let s = "";
-    for (const x of buf) s += abc[x % 62];
-    return s;
+    const out = [];
+    const buf = new Uint8Array(16);
+    while (out.length < 8) {
+      crypto.getRandomValues(buf);
+      for (const b of buf) {
+        if (b >= 248) continue; // 248 = 31 × 8: every character stays equally likely
+        out.push(ID_ALPHABET[b % ID_ALPHABET.length]);
+        if (out.length === 8) break;
+      }
+    }
+    return out.join("");
   }
 
-  // Short backend link (/s.html?id=) with offline #p= fallback. Never throws.
+  // Short backend link (/<id>) with the self-contained #p= link as the offline
+  // fallback. Never throws.
   async function createShortLink(shelf) {
     try {
       const base = window.FAVSONGS_SUPABASE_URL || "";
@@ -118,7 +168,7 @@
         body: JSON.stringify({ id, songs: slim }),
       });
       if (!r.ok) return null;
-      return location.origin + "/s.html?id=" + id;
+      return location.origin + "/" + id;
     } catch {
       return null;
     }
@@ -163,13 +213,27 @@
 
   // Shared-shelf view (#p= link): pinned favourite on top, playlist below.
   const shared = decodeShare(location.hash || "");
+
+  // A second #p= link opened in this tab, or a plain fragment link clicked from
+  // a long-link view, changes only the hash — this script never runs again, so
+  // the page would keep showing the shelf you just navigated away from.
+  const startHash = location.hash.startsWith("#p=") ? location.hash : "";
+  let reloading = false;
+  window.addEventListener("hashchange", () => {
+    if (reloading) return;
+    const next = location.hash.startsWith("#p=") ? location.hash : "";
+    if (next === startHash) return;
+    reloading = true;
+    location.reload();
+  });
+  // Self-hosted, single-colour marks — the same set the song page uses.
   const SVC_LOGO = {
-    "open.spotify.com": "https://cdn.simpleicons.org/spotify",
-    "music.apple.com": "https://cdn.simpleicons.org/applemusic",
-    "music.youtube.com": "https://cdn.simpleicons.org/youtubemusic",
-    "youtube.com": "https://cdn.simpleicons.org/youtube",
-    "soundcloud.com": "https://cdn.simpleicons.org/soundcloud",
-    "deezer.com": "https://cdn.simpleicons.org/deezer",
+    "open.spotify.com": "logos/spotify.svg",
+    "music.apple.com": "logos/applemusic.svg",
+    "music.youtube.com": "logos/youtubemusic.svg",
+    "youtube.com": "logos/youtube.svg",
+    "soundcloud.com": "logos/soundcloud.svg",
+    "deezer.com": "logos/deezer.svg",
   };
   function svcLogo(u) {
     try {
@@ -211,22 +275,47 @@
     document.getElementById("playSharedBtn").addEventListener("click", () => {
       location.href = window.SharedList.songPageUrl(first);
     });
+    // Say how many landed, then offer the shelf instead of yanking the reader
+    // off the shelf they were just sent.
     $("saveAllBtn").addEventListener("click", () => {
-      const mine = loadShelf();
-      const have = new Set(mine.map((o) => (o.t + "|||" + o.a).toLowerCase()));
-      let n = 0;
-      for (const s of shared) {
-        const key = (s.t + "|||" + s.a).toLowerCase();
-        if (!have.has(key)) {
-          have.add(key);
-          mine.push({ ...s, id: "mine-" + Date.now() + "-" + n++ });
-        }
-      }
-      saveShelf(mine);
-      history.replaceState(null, "", location.pathname);
-      location.reload();
+      const added = store ? store.addSongs(shared) : 0;
+      const status = $("sharedStatus");
+      if (!status) return;
+      status.hidden = false;
+      status.textContent = added
+        ? "Added " + added + " song" + (added > 1 ? "s" : "") + " to your shelf — "
+        : "All " + shared.length + " song" + (shared.length > 1 ? "s are" : " is") + " already on your shelf — ";
+      const a = document.createElement("a");
+      a.className = "link-btn";
+      a.href = "index.html#shelf";
+      a.textContent = "see your shelf";
+      a.addEventListener("click", () => {
+        history.replaceState(null, "", location.pathname);
+      });
+      status.append(a);
     });
-    $("dismissSharedBtn").addEventListener("click", () => {
+    // Keep the whole shelf as one entry, so it can be reopened from the Kept
+    // page later without digging the link back out of a chat.
+    $("keepBtn")?.addEventListener("click", () => {
+      // The long link carries no id, so the shelf itself is the identity: two
+      // different long links are two entries, the same one is one entry.
+      const sig = shared.map((s) => s.t + "|" + s.a).join("~");
+      const lid = "long-" + hash32(sig);
+      const already = store && store.isKept(lid);
+      const kept = store && store.keep({ id: lid, url: location.href, songs: shared });
+      const status = $("sharedStatus");
+      if (!status) return;
+      status.hidden = false;
+      status.textContent = kept
+        ? (already ? "Already kept — " : "Kept " + shared.length + " song" + (shared.length > 1 ? "s" : "") + " — ")
+        : "Could not keep this shelf — ";
+      const a = document.createElement("a");
+      a.className = "link-btn";
+      a.href = "saved.html";
+      a.textContent = already ? "open it under Kept" : "see it under Kept";
+      status.appendChild(a);
+    });
+    $("dismissSharedBtn")?.addEventListener("click", () => {
       history.replaceState(null, "", location.pathname);
       location.reload();
     });
@@ -234,16 +323,34 @@
     render();
   }
 
+  // A second click, a double tap or an impatient repeat must not mint a second
+  // link: one shelf, one link. `sharing` stops the overlap, `posted` reuses the
+  // link this shelf already has.
+  let sharing = false;
+  const shelfKey = (shelf) => shelf.map((s) => s.t + "|" + s.a).join("~");
+
   $("shareBtn").addEventListener("click", async () => {
+    if (sharing) return;
     const shelf = loadShelf();
     if (!shelf.length) return;
     const hint = $("shareHint");
     const box = document.getElementById("shareBox");
     const input = document.getElementById("shareLink");
+    const key = shelfKey(shelf);
+    const remembered = store ? store.loadLink(key) : null;
+    const btn = $("shareBtn");
+    sharing = true;
+    btn.disabled = true;
     hint.textContent = "Making a short link…";
-    // Short backend link first (bio-friendly), long self-contained link
-    // as the offline fallback. Never prompt() — dialogs get suppressed.
-    const link = (await createShortLink(shelf)) || encodeShare(shelf);
+    // Short backend link first (bio-friendly), long self-contained link as the
+    // offline fallback. A shelf that already has a link keeps it, so the link
+    // in someone's bio does not change every time they reshare. Never prompt()
+    // — dialogs get suppressed.
+    let link = remembered ? remembered.link : "";
+    if (!link) link = (await createShortLink(shelf)) || encodeShare(shelf);
+    if (store) store.saveLink(key, link); // only short links are worth keeping
+    sharing = false;
+    btn.disabled = false;
     const short = !link.includes("#p=");
     input.value = link;
     box.hidden = false;
@@ -268,17 +375,31 @@
   });
 
   $("addBtn").addEventListener("click", () => {
-    const t = cleanStr($("fTitle").value);
-    if (!t) { $("fTitle").focus(); return; }
-    const shelf = loadShelf();
-    shelf.push({
-      id: "mine-" + Date.now(),
-      t, a: cleanStr($("fArtist").value),
-      al: "", art: safeHttps($("fArt").value), u: safeHttps($("fLink").value),
-    });
-    saveShelf(shelf);
+    const song = {
+      t: cleanStr($("fTitle").value),
+      a: cleanStr($("fArtist").value),
+      al: "",
+      art: safeHttps($("fArt").value),
+      u: safeHttps($("fLink").value),
+    };
+    if (!song.t) {
+      $("fTitle").focus();
+      note("A title is all a song needs.");
+      return;
+    }
+    // Adding by hand goes through the same door as an imported shelf, so the
+    // same song twice is one card, not two.
+    const added = store ? store.addSongs([song]) : 0;
+    if (!added) {
+      note("“" + song.t + "” is already on your shelf.");
+      return;
+    }
     $("fTitle").value = $("fArtist").value = $("fLink").value = $("fArt").value = "";
-    render();
+    // addSongs appends, so the last song is the one that just landed. It gets
+    // the one-time pop: the shelf says hello to it without a toast.
+    const mine = loadShelf();
+    render(mine.length ? mine[mine.length - 1].id : "");
+    note("Added “" + song.t + "”.");
   });
 
   // Import: Spotify + YouTube oEmbed auto-fill, Apple = manual.

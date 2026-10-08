@@ -1,150 +1,218 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Shared shelf — FavSongs</title>
-    <meta name="description" content="Someone shared their favourite music with you on FavSongs." />
-    <link rel="canonical" href="https://favsongs.pages.dev/shelf.html" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%23ffb020'/%3E%3Cpath d='M16 4.5 18.6 13.4 27.5 16 18.6 18.6 16 27.5 13.4 18.6 4.5 16 13.4 13.4Z' fill='%230b0a08'/%3E%3Ccircle cx='23' cy='8.6' r='2' fill='%230b0a08' opacity='.5'/%3E%3C/svg%3E" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css" />
-    <style>
-      [hidden] { display: none !important; }
-      body.shelf-page { min-height: 100svh; display: flex; flex-direction: column; }
-      main.shelf-main { flex: 1; width: 100%; }
-      /* Viewer mode: wordmark only — the link is about their songs. */
-      body.viewer .fav-nav,
-      body.viewer [data-theme-toggle],
-      body.viewer #authArea,
-      body.viewer .fav-top .btn {
-        display: none;
-      }
-      .s-error { text-align: center; padding: 5rem var(--rail); color: var(--ink-dim); }
-      .s-error h1 { color: var(--ink); }
-    </style>
-  </head>
-  <body class="shelf-page viewer">
-    <a class="skip-link" href="#main">Skip to content</a>
-    <header class="fav-top">
-      <div class="fav-top-inner">
-        <a class="fav-brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
-        <nav class="fav-nav" aria-label="Primary">
-          <a href="shelf.html">My shelf</a>
-          <a href="song.html">Sample song</a>
-        </nav>
-        <div class="fav-top-spot">
-          <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme"><span data-theme-icon>☀</span></button>
-          <span id="authArea"></span>
-        </div>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Shared shelf — FavSongs</title>
+<meta name="description" content="Someone sent you a shelf of songs. Listen to each one, or save the whole shelf to your own." />
+<link rel="canonical" href="https://favsongs.pages.dev/s" />
+<!-- Link preview defaults. Chat apps never run the shelf-lookup script below,
+     so the Pages Function at /functions/s.js rewrites these with the real shelf
+     (title, first cover, song count). These values are the honest fallback for
+     when a link can't be checked. -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="FavSongs" />
+<meta property="og:title" content="A shelf of songs, shared with you" />
+<meta property="og:description" content="Someone sent you a shelf of songs. Listen to each one, or save the whole shelf to your own." />
+<meta property="og:url" content="https://favsongs.pages.dev/s" />
+<meta property="og:image" content="https://favsongs.pages.dev/og-cover.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="FavSongs — keep the songs you love, share them as one link" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="A shelf of songs, shared with you" />
+<meta name="twitter:description" content="Someone sent you a shelf of songs. Listen to each one, or save the whole shelf to your own." />
+<meta name="twitter:image" content="https://favsongs.pages.dev/og-cover.png" />
+<meta name="robots" content="noindex" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="fonts.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="viewer">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="top-inner">
+    <a class="brand" href="index.html" aria-label="FavSongs home">Fav<em>Songs</em></a>
+    <nav class="nav" aria-label="Primary">
+      <a href="index.html#shelf">Shelf</a>
+      <a href="index.html#share">One link</a>
+      <a href="saved.html">Kept</a>
+      <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A song</a>
+    </nav>
+    <div class="top-spot">
+      <span id="authArea"></span>
+      <a class="btn btn-primary btn-sm top-cta" href="index.html#shelf">Make your own shelf</a>
+      <button class="icon-btn" id="menuOpen" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileNav">☰</button>
+    </div>
+  </div>
+</header>
+
+<div id="mobileNav" aria-label="Menu">
+  <div class="sheet-head">
+    <span class="kicker is-plain">menu</span>
+    <button class="icon-btn" id="menuClose" type="button" aria-label="Close menu">✕</button>
+  </div>
+  <a href="index.html#shelf">Shelf</a>
+  <a href="index.html#share">One link</a>
+  <a href="saved.html">Kept</a>
+  <a href="index.html#how">How it works</a>
+  <a href="song.html?t=Ghost&amp;a=Justin%20Bieber">A sample song</a>
+  <a href="legal.html">Legal</a>
+</div>
+<div id="mobileBackdrop"></div>
+
+<main id="main" class="sec">
+  <div id="sharedBar" class="panel" hidden>
+    <span class="share-note" id="sharedNote"></span>
+    <span class="share-actions">
+      <button class="btn btn-sm btn-primary" id="saveAllBtn" type="button">Save all to my shelf</button>
+      <button class="btn btn-sm btn-ghost" id="keepBtn" type="button">Keep this shelf</button>
+    </span>
+    <span class="share-note" id="sharedStatus" hidden aria-live="polite"></span>
+  </div>
+
+  <div class="sec-head" id="shelf">
+    <!-- Hidden until the link actually resolves, so the page never shows a
+         "shared shelf" heading above a "link not found" message. -->
+    <div>
+      <p class="kicker">shared with you</p>
+      <h2 id="shelfTitle" class="display-sm">Shared shelf</h2>
+      <p id="shelfMeta"></p>
+    </div>
+    <a class="btn btn-sm" href="index.html#shelf">Start your own</a>
+  </div>
+
+  <div id="playlistWrap" hidden>
+    <a class="featured featured-big" id="featuredCard" href="#">
+      <img id="featuredArt" alt="" />
+      <div class="featured-meta">
+        <span class="mini">pinned favourite</span>
+        <h3 id="featuredTitle"></h3>
+        <p id="featuredSub"></p>
+        <span class="go">open the song →</span>
       </div>
-    </header>
-    <main id="main" class="shelf-main">
-      <div class="share-actions" id="sharedBar" hidden>
-        <span class="share-note" id="sharedNote"></span>
-        <span class="share-btns">
-          <button class="btn btn-primary btn-sm" id="saveAllBtn" type="button">Save all</button>
-        </span>
-      </div>
-      <section class="fav-sec" id="shelf">
-        <div class="fav-sec-head">
-          <h2 id="shelfTitle">Shared shelf</h2>
-          <p id="shelfMeta"></p>
-        </div>
-        <div id="playlistWrap" hidden>
-          <a class="featured featured-big" id="featuredCard" href="#">
-            <img id="featuredArt" alt="" />
-            <span class="featured-meta">
-              <span class="kicker">Pinned favourite</span>
-              <b id="featuredTitle"></b>
-              <span id="featuredSub"></span>
-              <span class="go"><i>▶</i> Open song page</span>
-            </span>
-          </a>
-          <div class="playlist" id="playlistRows"></div>
-          <p class="made-with">Created with <a href="index.html"><b>Fav<em>Songs</em></b></a></p>
-        </div>
-      </section>
-      <div class="s-error" id="linkError" hidden>
-        <h1>Link not found</h1>
-        <p>This shelf link is invalid or was removed.</p>
-        <p><a class="btn btn-primary" href="index.html">Make your own shelf</a></p>
-      </div>
-    </main>
-    <script src="site.js"></script>
-    <script src="supabase-config.js" onerror="this.remove()"></script>
-    <script src="shared.js"></script>
-    <script>
-      (() => {
-        "use strict";
-        const id = new URLSearchParams(location.search).get("id") || "";
-        if (!/^[A-Za-z0-9_-]{6,12}$/.test(id)) {
-          document.getElementById("linkError").hidden = false;
-          return;
-        }
-        const SUPA_URL = window.FAVSONGS_SUPABASE_URL || "";
-        const SUPA_KEY = window.FAVSONGS_SUPABASE_ANON_KEY || "";
-        if (!SUPA_URL.startsWith("https://") || SUPA_KEY.length < 20) {
-          // Backend not wired yet — explain instead of spinning.
-          const err = document.getElementById("linkError");
-          err.querySelector("h1").textContent = "Sharing is still starting up";
-          err.querySelector("p").textContent = "Short links activate once cloud sync is configured. Try again soon.";
-          err.hidden = false;
-          return;
-        }
-        fetch(SUPA_URL + "/rest/v1/shared_links?id=eq." + encodeURIComponent(id) + "&select=songs", {
-          headers: { apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY },
-        })
-          .then((r) => (r.ok ? r.json() : null))
-          .then((rows) => {
-            const songs = rows && rows[0] && Array.isArray(rows[0].songs) ? rows[0].songs : [];
-            const clean = songs
-              .filter((s) => s && typeof s.t === "string" && s.t.trim())
-              .slice(0, 24)
-              .map((s) => ({
-                t: String(s.t).slice(0, 120),
-                a: String(s.a || "").slice(0, 120),
-                al: String(s.al || "").slice(0, 120),
-                art: /^https:\/\//.test(s.art || "") ? s.art : "",
-                u: /^https:\/\//.test(s.u || "") ? s.u : "",
-              }));
-            if (!clean.length) throw new Error("empty");
-            document.getElementById("sharedBar").hidden = false;
-            document.getElementById("sharedNote").textContent =
-              clean.length + " song" + (clean.length > 1 ? "s" : "") + " shared with you — save them or just press play.";
-            document.getElementById("shelfMeta").textContent = clean.length + " songs";
-            document.getElementById("playlistWrap").hidden = false;
-            window.SharedList.renderPlaylist(
-              {
-                featuredCard: document.getElementById("featuredCard"),
-                featuredArt: document.getElementById("featuredArt"),
-                featuredTitle: document.getElementById("featuredTitle"),
-                featuredSub: document.getElementById("featuredSub"),
-                rowsEl: document.getElementById("playlistRows"),
-              },
-              clean,
-              { playable: true },
-            );
-            document.getElementById("saveAllBtn").addEventListener("click", () => {
-              try {
-                const raw = localStorage.getItem("favsongs.shelf.v1");
-                const mine = raw ? JSON.parse(raw) : [];
-                const have = new Set(mine.map((o) => ((o.t || "") + "|||" + (o.a || "")).toLowerCase()));
-                for (const s of clean) {
-                  if (!have.has(((s.t || "") + "|||" + (s.a || "")).toLowerCase())) {
-                    mine.push({ ...s, id: "mine-" + Date.now() + "-" + Math.floor(Math.random() * 1e6) });
-                  }
-                }
-                localStorage.setItem("favsongs.shelf.v1", JSON.stringify(mine));
-              } catch { /* private mode */ }
-              location.href = "shelf.html";
-            });
-            // Best-effort view counter skipped: anon has no update lane
-            // by design (insert + select only).
-          })
-          .catch(() => {
-            document.getElementById("linkError").hidden = false;
-          });
-      })();
-    </script>
-  </body>
+    </a>
+    <div class="playlist" id="playlistRows" style="margin-top:0.8rem"></div>
+    <p class="made-with" style="margin-top:1.2rem">Made with <a href="index.html" style="color:var(--ink)"><b>Fav<em style="font-style:normal;color:var(--red)">Songs</em></b></a></p>
+  </div>
+
+  <div class="s-error" id="linkError" hidden>
+    <h1>Link not found</h1>
+    <p>This shelf link is invalid or was removed.</p>
+    <p style="margin-top:1.4rem"><a class="btn btn-primary" href="index.html#shelf">Make your own shelf</a></p>
+  </div>
+</main>
+
+<footer class="foot">
+  <p class="foot-copy">© <span data-year>2026</span> FavSongs — a shared shelf resolves artwork and previews in your browser.</p>
+</footer>
+
+<script src="site.js"></script>
+<script src="store.js"></script>
+<script src="supabase-config.js" onerror="this.remove()"></script>
+<script src="shared.js"></script>
+<script>
+  /* Shared-shelf viewer. Three addresses land here — /<id> (the short link),
+     /s?id=XXXX and the older /s.html?id=XXXX — and all three read the same
+     shelf. Falls back to a readable error state when the backend is not wired
+     yet, never to a spinner. */
+  (() => {
+    "use strict";
+    const store = window.FavSongsStore || null;
+    const seg = location.pathname.replace(/\/+$/, "").split("/").filter(Boolean);
+    // A root segment is the shelf id only when it is not a page: /s.html?id=…
+    // (the old form, served here by the Function) must still read the query.
+    const RESERVED = ["s", "index", "song", "saved", "shelf", "legal"];
+    const fromPath =
+      seg.length === 1 && !RESERVED.includes(seg[0]) && !seg[0].includes(".") ? seg[0] : "";
+    const id = fromPath || new URLSearchParams(location.search).get("id") || "";
+    const showError = () => {
+      // One state only: the shared-shelf heading belongs to a resolved shelf.
+      document.getElementById("shelf")?.setAttribute("hidden", "");
+      document.getElementById("linkError").hidden = false;
+    };
+    if (!/^[A-Za-z0-9_-]{6,12}$/.test(id)) {
+      showError();
+      return;
+    }
+    const SUPA_URL = window.FAVSONGS_SUPABASE_URL || "";
+    const SUPA_KEY = window.FAVSONGS_SUPABASE_ANON_KEY || "";
+    if (!SUPA_URL.startsWith("https://") || SUPA_KEY.length < 20) {
+      const err = document.getElementById("linkError");
+      err.querySelector("h1").textContent = "Sharing is still starting up";
+      err.querySelector("p").textContent = "Short links activate once cloud sync is configured. Try again soon.";
+      showError();
+      return;
+    }
+    fetch(SUPA_URL + "/rest/v1/shared_links?id=eq." + encodeURIComponent(id) + "&select=songs", {
+      headers: { apikey: SUPA_KEY, Authorization: "Bearer " + SUPA_KEY },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((rows) => {
+        const songs = rows && rows[0] && Array.isArray(rows[0].songs) ? rows[0].songs : [];
+        const clean = songs
+          .filter((s) => s && typeof s.t === "string" && s.t.trim())
+          .slice(0, 24)
+          .map((s) => ({
+            t: String(s.t).slice(0, 120),
+            a: String(s.a || "").slice(0, 120),
+            al: String(s.al || "").slice(0, 120),
+            art: /^https:\/\//.test(s.art || "") ? s.art : "",
+            u: /^https:\/\//.test(s.u || "") ? s.u : "",
+          }));
+        if (!clean.length) throw new Error("empty");
+        document.getElementById("sharedBar").hidden = false;
+        document.getElementById("sharedNote").textContent =
+          clean.length + " song" + (clean.length > 1 ? "s" : "") + " shared with you — save them or just press play.";
+        document.getElementById("shelfMeta").textContent = clean.length + " song" + (clean.length > 1 ? "s" : "");
+        document.getElementById("playlistWrap").hidden = false;
+        window.SharedList.renderPlaylist(
+          {
+            featuredCard: document.getElementById("featuredCard"),
+            featuredArt: document.getElementById("featuredArt"),
+            featuredTitle: document.getElementById("featuredTitle"),
+            featuredSub: document.getElementById("featuredSub"),
+            rowsEl: document.getElementById("playlistRows"),
+          },
+          clean,
+          { playable: true },
+        );
+        document.getElementById("saveAllBtn").addEventListener("click", () => {
+          const added = store ? store.addSongs(clean) : 0;
+          const status = document.getElementById("sharedStatus");
+          status.hidden = false;
+          status.textContent = added
+            ? "Added " + added + " song" + (added > 1 ? "s" : "") + " to your shelf — "
+            : "All " + clean.length + " song" + (clean.length > 1 ? "s are" : " is") + " already on your shelf — ";
+          const a = document.createElement("a");
+          a.className = "link-btn";
+          a.href = "index.html#shelf";
+          a.textContent = "see your shelf";
+          status.appendChild(a);
+        });
+        // Keep the shelf itself, so it can be reopened from the Kept page
+        // without finding this link again.
+        document.getElementById("keepBtn").addEventListener("click", () => {
+          const url = fromPath ? location.origin + "/" + fromPath : location.href;
+          const already = store && store.isKept(id);
+          const kept = store && store.keep({ id, url, songs: clean });
+          const status = document.getElementById("sharedStatus");
+          status.hidden = false;
+          status.textContent = kept
+            ? (already ? "Already kept — " : "Kept " + clean.length + " song" + (clean.length > 1 ? "s" : "") + " — ")
+            : "Could not keep this shelf — ";
+          const a = document.createElement("a");
+          a.className = "link-btn";
+          a.href = "saved.html";
+          a.textContent = already ? "open it under Kept" : "see it under Kept";
+          status.appendChild(a);
+        });
+      })
+      .catch(() => {
+        showError();
+      });
+  })();
+</script>
+</body>
 </html>
