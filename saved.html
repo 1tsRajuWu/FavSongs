@@ -70,6 +70,14 @@
 
   <p class="share-note" id="keptNote" hidden aria-live="polite"></p>
 
+  <!-- This page is where the library lives, so this is where it can leave the
+       browser and come back: one file, owned by the reader. -->
+  <div class="kept-tools">
+    <button class="btn btn-sm" id="exportBtn" type="button">Export library</button>
+    <button class="btn btn-sm btn-ghost" id="importBtn" type="button">Import a library</button>
+    <input id="importFile" type="file" accept="application/json,.json" hidden />
+  </div>
+
   <!-- First run: what keeping a shelf actually does. -->
   <div class="shelf-empty" id="keptEmpty">
     <b>No shelves kept yet.</b>

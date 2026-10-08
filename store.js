@@ -139,10 +139,59 @@
     write(SHARE_KEY, [{ key: k, link: l }, ...loadLinks().filter((e) => e.key !== k)].slice(0, LINK_CAP));
   }
 
+  /* Everything this browser holds, in one file the reader owns. A shelf that
+     only exists in localStorage disappears with a cleared cache, a new laptop
+     or a private window, so the library has to be portable to be trusted. */
+  const FORMAT = "favsongs.library.v1";
+  const FILE_SONG_CAP = 500;
+
+  function exportLibrary() {
+    return {
+      format: FORMAT,
+      exported: new Date().toISOString(),
+      shelf: loadShelf(),
+      kept: loadKept(),
+      links: loadLinks(),
+    };
+  }
+
+  /* Read a library file back in. Nothing in it is trusted: every field goes
+     through the same normalisation the live state uses, lists are capped, and
+     an entry that survives is merged rather than replacing what is here.
+     Returns what actually landed, or null when the file is not ours. */
+  function importLibrary(data) {
+    if (!data || typeof data !== "object" || data.format !== FORMAT) return null;
+    const songs = (Array.isArray(data.shelf) ? data.shelf : []).slice(0, FILE_SONG_CAP);
+    const added = addSongs(songs);
+    const had = new Set(loadKept().map((k) => k.id));
+    let shelves = 0;
+    for (const entry of (Array.isArray(data.kept) ? data.kept : []).slice(0, KEPT_CAP)) {
+      if (!entry || typeof entry !== "object") continue;
+      const id = text(entry.id, 24) || "long";
+      if (had.has(id)) continue;
+      if (!keep({ id, url: entry.url, at: entry.at, songs: entry.songs })) continue;
+      had.add(id);
+      shelves++;
+    }
+    let links = 0;
+    for (const entry of (Array.isArray(data.links) ? data.links : []).slice(0, LINK_CAP)) {
+      if (!entry || typeof entry !== "object") continue;
+      if (loadLink(entry.key)) continue;
+      const link = shortLink(entry.link);
+      // A file someone handed you may not redirect this browser's own short
+      // links somewhere else: they have to point at this site.
+      if (!link.startsWith(location.origin + "/")) continue;
+      saveLink(entry.key, link);
+      links++;
+    }
+    return { songs: added, shelves, links };
+  }
+
   window.FavSongsStore = {
     loadShelf, saveShelf, addSongs,
     loadKept, keep, dropKept, isKept,
     loadLink, saveLink,
+    exportLibrary, importLibrary,
     songKey, text, https,
   };
 })();

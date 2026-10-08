@@ -202,7 +202,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 #mobileNav.is-open + #mobileBackdrop { opacity: 1; pointer-events: auto; }
 
 /* ------------------------------------------------------------------ hero */
-.hero { position: relative; padding: clamp(2.2rem, 6vw, 4.6rem) var(--rail) clamp(1.6rem, 4vw, 3rem); overflow: clip; }
+.hero { position: relative; padding: clamp(1.5rem, 3.4vw, 2.8rem) var(--rail) clamp(1.2rem, 2.6vw, 2rem); overflow: clip; }
 .hero::before {
   content: ""; position: absolute; inset: -30% -10% auto; height: 80%; pointer-events: none;
   background: radial-gradient(58% 60% at 50% 34%, rgba(255, 20, 0, 0.12), transparent 72%);
@@ -211,11 +211,27 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
   position: relative; display: grid; gap: clamp(1.6rem, 4vw, 3.2rem);
   max-width: var(--maxw); margin: 0 auto; align-items: center;
 }
-@media (min-width: 980px) { .hero-grid { grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr); } }
-.hero-copy { max-width: 40ch; }
-.hero h1 { margin: 0.75rem 0 1rem; }
-.hero .actions { margin-top: 1.6rem; }
-.hero-note { margin-top: 1.1rem; font-size: 0.9rem; color: var(--muted); }
+@media (min-width: 980px) {
+  /* Both columns start at the top: the promise reads first, the shelf beside it,
+     and nothing floats in the middle of the empty half. */
+  .hero-grid { grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr); align-items: start; }
+}
+/* The hero is one screen: a short headline that reads in two or three lines,
+   one paragraph, two buttons — and nothing below them. */
+.hero-copy { max-width: 60ch; }
+.hero h1 { margin: 0.6rem 0 0.9rem; }
+.hero .display { font-size: clamp(2rem, 4.2vw, 3.4rem); max-width: 20ch; }
+.hero .lede { max-width: 42ch; }
+.hero .actions { margin-top: 1.4rem; }
+
+/* Under the hero: the reassurance and the import strip, out of the first screen. */
+.hero-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem 2rem;
+  flex-wrap: wrap; max-width: var(--maxw); margin: 0 auto;
+  padding: 0 var(--rail) clamp(1.4rem, 3vw, 2.2rem);
+}
+.hero-note { margin: 0; font-size: 0.9rem; color: var(--muted); }
+.hero-foot .platforms { margin-top: 0; }
 
 .platforms { display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; margin-top: 2rem; }
 .platforms img { width: 20px; height: 20px; opacity: 0.62; transition: opacity 0.25s var(--ease); }
@@ -225,7 +241,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 /* the shelf mark: the loop, cropped to its ink and used as a band */
 .mark {
   margin: 0 auto 1.4rem; position: relative;
-  max-width: min(1000px, 92vw); aspect-ratio: 1470 / 500; overflow: hidden;
+  max-width: min(720px, 84vw); aspect-ratio: 1470 / 500; overflow: hidden;
 }
 .mark video {
   width: 100%; height: 100%; object-fit: cover; object-position: center 40%; display: block;
@@ -561,6 +577,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 .kept-toggle:hover { color: var(--ink); }
 .kept-songs { margin-top: 0.2rem; }
 #keptNote { display: block; margin: 0 0 1rem; }
+.kept-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0 0 1.4rem; }
 .link-btn {
   border: 0; background: transparent; cursor: pointer; font: inherit; padding: 0 0 0 0.35rem;
   color: var(--ink); text-decoration: underline; text-underline-offset: 3px;

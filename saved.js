@@ -196,6 +196,74 @@
     return el;
   }
 
+  /* ---------------------------------------------------------------- library
+     Your shelf and the shelves you kept are one file. Export writes it out;
+     import reads one back, merging rather than replacing, and treats every
+     field in the file as untrusted input (store.js does the normalising). */
+  const MAX_FILE = 2 * 1024 * 1024;
+
+  function wireLibrary() {
+    const exportBtn = $("exportBtn");
+    const importBtn = $("importBtn");
+    const importFile = $("importFile");
+    if (!exportBtn || !importBtn || !importFile || !store) return;
+    const plural = (n, one, many) => n + " " + (n === 1 ? one : many);
+
+    exportBtn.addEventListener("click", () => {
+      const lib = store.exportLibrary();
+      const songs = lib.shelf.length;
+      const shelves = lib.kept.length;
+      if (!songs && !shelves) {
+        say("Nothing to export yet — build a shelf, or keep one someone sent you.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(lib, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "favsongs-library.json";
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      say(
+        "Exported " + plural(songs, "song", "songs") + " and " +
+          plural(shelves, "kept shelf", "kept shelves") + " to favsongs-library.json.",
+        { label: "see your shelf", href: "index.html#shelf" },
+      );
+    });
+
+    importBtn.addEventListener("click", () => importFile.click());
+
+    importFile.addEventListener("change", async () => {
+      const file = importFile.files && importFile.files[0];
+      importFile.value = ""; // choosing the same file twice still fires
+      if (!file) return;
+      if (file.size > MAX_FILE) {
+        say("That file is far too big to be a FavSongs library.");
+        return;
+      }
+      let landed = null;
+      try {
+        landed = store.importLibrary(JSON.parse(await file.text()));
+      } catch {
+        landed = null;
+      }
+      if (!landed) {
+        say("That file is not a FavSongs library — export one from this page first.");
+        return;
+      }
+      render();
+      const empty = !landed.songs && !landed.shelves;
+      say(
+        "Imported " + plural(landed.songs, "new song", "new songs") + " and " +
+          plural(landed.shelves, "kept shelf", "kept shelves") + "." +
+          (empty ? " Everything in it was already here." : ""),
+        landed.songs ? { label: "see your shelf", href: "index.html#shelf" } : null,
+      );
+    });
+  }
+
   function render() {
     const kept = store ? store.loadKept() : [];
     list.textContent = "";
@@ -209,4 +277,5 @@
   }
 
   render();
+  wireLibrary();
 })();
