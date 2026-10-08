@@ -34,6 +34,37 @@ const SCRIPT_HEADERS = {
 
 let configCache = null;
 
+/* Abuse limit for the one expensive path.
+ *
+ * A shelf request costs a round trip to Supabase, so a script looping over ids
+ * spends the project's quota a request at a time. Cloudflare runs one isolate
+ * per colo and recycles them, so this blunts a burst from one address — it is
+ * not a global quota, and the account's own rate limiting rules remain the
+ * authority. A request with no client address is never limited: a shared proxy
+ * must not be punished for someone else's traffic. */
+const RATE_MAX = 60;
+const RATE_WINDOW_MS = 60_000;
+const rateHits = new Map();
+
+function overRate(ip) {
+  if (!ip) return false;
+  const now = Date.now();
+  const seen = (rateHits.get(ip) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  if (seen.length >= RATE_MAX) {
+    rateHits.set(ip, seen);
+    return true;
+  }
+  seen.push(now);
+  rateHits.set(ip, seen);
+  // A long-lived isolate must not grow an address map forever.
+  if (rateHits.size > 10_000) {
+    for (const [key, times] of rateHits) {
+      if (!times.length || now - times[times.length - 1] >= RATE_WINDOW_MS) rateHits.delete(key);
+    }
+  }
+  return false;
+}
+
 function cleanStr(value, max) {
   if (typeof value !== "string") return "";
   return value
@@ -245,6 +276,18 @@ export async function onRequest(context) {
   if (url.pathname === "/supabase-config.js") return configScript(request, env);
   const id = requestedId(url);
   if (!id) return next(); // a real page or asset: let it through
+
+  if (overRate(request.headers.get("CF-Connecting-IP"))) {
+    return new Response("Too many shared-shelf requests from this address. Try again in a minute.\n", {
+      status: 429,
+      headers: {
+        "content-type": "text/plain; charset=utf-8",
+        "retry-after": "60",
+        "cache-control": "no-store",
+        "x-content-type-options": "nosniff",
+      },
+    });
+  }
 
   const asset = await env.ASSETS.fetch(viewerRequest(request));
   if (!asset.ok) return next(); // no viewer page deployed

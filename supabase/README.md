@@ -68,6 +68,24 @@ and for the page: `env` first, then the file.
 - Production deploys need `SUPABASE_URL` + `SUPABASE_ANON_KEY` as GitHub
   repo secrets; the workflow writes `supabase-config.js` from them (the file
   stays gitignored) so the page *and* the preview card read the same values.
-- `shared_links` has no DELETE policy, so share rows can only be removed
-  from the Supabase dashboard (Table editor) — worth a cleanup/expiry policy
-  before the table grows forever.
+## One link per shelf (`shared-links.sql`)
+
+A share row belongs to the browser that made it, through a secret that browser
+keeps (`favsongs.share.own.v1`) and sends as the `x-share-key` header. Until
+`supabase/shared-links.sql` is applied, that update is refused and the site
+mints a new row every time the shelf changes — the old behaviour, unchanged.
+Applying the file turns a reshare into *the same link, updated*, caps what one
+insert may carry, and adds an expiry function.
+
+The measured state of the table, before that file:
+
+- INSERT is open to the public key (that is the feature) — and uncapped, which
+  is why the SQL adds array and byte bounds.
+- SELECT returns every row, so shared shelves are unlisted, not unguessable.
+  Ids are 8 characters of a 31-character alphabet (~40 bits).
+- UPDATE and DELETE are refused (0 rows), so nobody can rewrite your shelf.
+- No DELETE policy by design: a link already pasted into a chat keeps working.
+- `prune_shared_links()` is the expiry path; schedule it if you want one.
+
+Our own test rows (`ogtest01`, `zzprobe1`) can only be removed from the SQL
+editor — the DELETE at the end of `shared-links.sql` does it.

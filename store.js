@@ -128,20 +128,25 @@
     return write(KEPT_KEY, kept) ? entry : null;
   }
 
-  /* Move one song inside a kept shelf. Both positions come from the store's own
-     list, so a reorder can never add, drop or duplicate a song — the only thing
-     that changes is the order the rows come back in. */
-  function moveKeptSong(id, index, delta) {
-    const at = Number(index);
-    const step = Number(delta) < 0 ? -1 : 1;
+  /* Move one song inside a kept shelf, from one position to another. Both
+     positions come from the store's own list, so a reorder can never add, drop
+     or duplicate a song — the only thing that changes is the order the rows come
+     back in. The arrow buttons ask for a neighbour, a drag asks for a row. */
+  function moveKeptSongTo(id, from, to) {
+    const a = Number(from), b = Number(to);
     const kept = loadKept();
     const entry = kept.find((k) => k.id === text(id, 24));
-    if (!entry || !Number.isInteger(at)) return null;
-    const to = at + step;
-    if (at < 0 || to < 0 || to >= entry.songs.length) return null;
-    const [moved] = entry.songs.splice(at, 1);
-    entry.songs.splice(to, 0, moved);
+    if (!entry || !Number.isInteger(a) || !Number.isInteger(b)) return null;
+    if (a < 0 || b < 0 || a >= entry.songs.length || b >= entry.songs.length || a === b) return null;
+    const [moved] = entry.songs.splice(a, 1);
+    entry.songs.splice(b, 0, moved);
     return write(KEPT_KEY, kept) ? entry : null;
+  }
+
+  function moveKeptSong(id, index, delta) {
+    const at = Number(index);
+    if (!Number.isInteger(at)) return null;
+    return moveKeptSongTo(id, at, at + (Number(delta) < 0 ? -1 : 1));
   }
 
   function dropKept(id) {
@@ -183,6 +188,41 @@
     const l = shortLink(link);
     if (!k || !l) return;
     write(SHARE_KEY, [{ key: k, link: l }, ...loadLinks().filter((e) => e.key !== k)].slice(0, LINK_CAP));
+  }
+
+  /* One shelf, one link.
+
+     The links above belong to a shelf *state*: change one song and the key
+     changes, so the site mints another row and the link in a bio goes stale.
+     This record is the browser's own shelf identity instead — the short id it
+     owns and the secret that proves the row is ours — which is what lets a
+     reshare update that same link. The secret is made here, kept here, and
+     only ever sent to the backend: supabase/shared-links.sql holds the policy
+     that reads it. Without that policy an update is refused, the caller mints
+     a new link, and nothing else changes. */
+  const OWN_KEY = "favsongs.share.own.v1";
+
+  function loadShare() {
+    try {
+      const rec = JSON.parse(localStorage.getItem(OWN_KEY) || "null");
+      if (!rec || typeof rec !== "object") return null;
+      const id = text(rec.id, 24);
+      const key = text(rec.key, 80);
+      return id && key ? { id, key, link: shortLink(rec.link), at: Number(rec.at) || 0 } : null;
+    } catch { return null; }
+  }
+
+  function saveShare(rec) {
+    const id = text(rec && rec.id, 24);
+    const key = text(rec && rec.key, 80);
+    if (!id || !key) return null;
+    const next = { id, key, link: shortLink(rec.link), at: Number(rec.at) || Date.now() };
+    try { localStorage.setItem(OWN_KEY, JSON.stringify(next)); return next; }
+    catch { return null; }
+  }
+
+  function clearShare() {
+    try { localStorage.removeItem(OWN_KEY); return true; } catch { return false; }
   }
 
   /* Everything this browser holds, in one file the reader owns. A shelf that
@@ -235,8 +275,8 @@
 
   window.FavSongsStore = {
     loadShelf, saveShelf, addSongs,
-    loadKept, keep, editKept, moveKeptSong, dropKept, isKept,
-    loadLink, saveLink,
+    loadKept, keep, editKept, moveKeptSong, moveKeptSongTo, dropKept, isKept,
+    loadLink, saveLink, loadShare, saveShare, clearShare,
     exportLibrary, importLibrary,
     songKey, text, https,
   };

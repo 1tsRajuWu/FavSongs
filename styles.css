@@ -604,6 +604,12 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 0; }
 }
 .kept-move button:hover:not(:disabled) { border-color: var(--line-2); color: var(--ink); }
 .kept-move button:disabled { opacity: 0.3; cursor: default; }
+/* A row can be dragged by its body or nudged by its arrows; the grip says so. */
+.kept-song[draggable="true"] { cursor: grab; }
+.kept-song.dragging { opacity: 0.45; cursor: grabbing; }
+.kept-song.drop-before { box-shadow: inset 0 2px 0 var(--red); }
+.kept-song.drop-after { box-shadow: inset 0 -2px 0 var(--red); }
+.kept-grip { color: var(--faint); font-size: 0.95rem; line-height: 1; user-select: none; padding: 0 0.1rem; }
 .kept-pos {
   font-family: var(--mono); font-size: 0.64rem; color: var(--faint);
   min-width: 1.3rem; text-align: right;

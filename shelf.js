@@ -146,33 +146,80 @@
     return out.join("");
   }
 
-  // Short backend link (/<id>) with the self-contained #p= link as the offline
-  // fallback. Never throws.
+  /* The backend, when this deploy has one. Never throws. */
+  function backend() {
+    const base = window.FAVSONGS_SUPABASE_URL || "";
+    const key = window.FAVSONGS_SUPABASE_ANON_KEY || "";
+    if (!base.startsWith("https://") || base.includes("YOUR_NEW") || key.length < 20) return null;
+    return { base, key };
+  }
+
+  const slimShelf = (shelf) =>
+    shelf.slice(0, 24).map((s) => ({ t: s.t, a: s.a || "", al: s.al || "", art: s.art || "", u: s.u || "" }));
+
+  // The secret behind a shelf this browser owns. The backend keeps only its
+  // SHA-256, so a leak of the table does not hand anyone the ability to rewrite
+  // a shelf. See supabase/shared-links.sql.
+  function shareKey() {
+    const buf = new Uint8Array(24);
+    crypto.getRandomValues(buf);
+    return Array.from(buf, (b) => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  /* Short backend link (/<id>) with the self-contained #p= link as the offline
+     fallback. Returns the id and the key that owns it, so the same link can be
+     updated later instead of being replaced. Never throws. */
   async function createShortLink(shelf) {
+    const c = backend();
+    if (!c) return null;
+    const id = shortId();
+    const key = shareKey();
     try {
-      const base = window.FAVSONGS_SUPABASE_URL || "";
-      const key = window.FAVSONGS_SUPABASE_ANON_KEY || "";
-      if (!base.startsWith("https://") || base.includes("YOUR_NEW") || key.length < 20) return null;
-      const slim = shelf.slice(0, 24).map((s) => ({
-        t: s.t, a: s.a || "", al: s.al || "", art: s.art || "", u: s.u || "",
-      }));
-      const id = shortId();
-      const r = await fetch(base + "/rest/v1/shared_links", {
+      const r = await fetch(c.base + "/rest/v1/shared_links", {
         method: "POST",
         headers: {
-          apikey: key,
-          Authorization: "Bearer " + key,
+          apikey: c.key,
+          Authorization: "Bearer " + c.key,
           "Content-Type": "application/json",
           Prefer: "return=minimal",
+          "x-share-key": key,
         },
-        body: JSON.stringify({ id, songs: slim }),
+        body: JSON.stringify({ id, songs: slimShelf(shelf) }),
       });
       if (!r.ok) return null;
-      return location.origin + "/" + id;
+      return { id, key, link: location.origin + "/" + id };
     } catch {
       return null;
     }
   }
+
+  /* Update the row this browser owns, so the link already sitting in someone's
+     bio keeps pointing at the current shelf. Until the backend carries the
+     matching policy this simply changes nothing (zero rows come back) and the
+     caller mints a new link, which is how the site behaved before. */
+  async function updateShortLink(own, shelf) {
+    const c = backend();
+    if (!c || !own || !own.id || !own.key) return false;
+    try {
+      const r = await fetch(c.base + "/rest/v1/shared_links?id=eq." + encodeURIComponent(own.id), {
+        method: "PATCH",
+        headers: {
+          apikey: c.key,
+          Authorization: "Bearer " + c.key,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+          "x-share-key": own.key,
+        },
+        body: JSON.stringify({ songs: slimShelf(shelf) }),
+      });
+      if (!r.ok) return false;
+      const rows = await r.json();
+      return Array.isArray(rows) && rows.length === 1;
+    } catch {
+      return false;
+    }
+  }
+
 
   async function copyText(text) {
     try {
@@ -342,12 +389,31 @@
     sharing = true;
     btn.disabled = true;
     hint.textContent = "Making a short link…";
-    // Short backend link first (bio-friendly), long self-contained link as the
-    // offline fallback. A shelf that already has a link keeps it, so the link
-    // in someone's bio does not change every time they reshare. Never prompt()
-    // — dialogs get suppressed.
+    // One shelf, one link: the link this browser already made is looked up
+    // first, then the shelf it owns is updated in place, and only a shelf the
+    // backend will not let us update mints another one — with the long
+    // self-contained link as the offline fallback. Never prompt() — dialogs
+    // get suppressed.
     let link = remembered ? remembered.link : "";
-    if (!link) link = (await createShortLink(shelf)) || encodeShare(shelf);
+    let updated = false;
+    if (!link) {
+      const own = store ? store.loadShare() : null;
+      if (own) {
+        hint.textContent = "Updating your link…";
+        if (await updateShortLink(own, shelf)) {
+          link = own.link || location.origin + "/" + own.id;
+          updated = true;
+        }
+      }
+      if (!link) {
+        const made = await createShortLink(shelf);
+        if (made) {
+          link = made.link;
+          if (store) store.saveShare(made);
+        }
+      }
+    }
+    if (!link) link = encodeShare(shelf);
     if (store) store.saveLink(key, link); // only short links are worth keeping
     sharing = false;
     btn.disabled = false;
@@ -359,7 +425,9 @@
     const copied = await copyText(link);
     hint.textContent = copied
       ? short
-        ? "Copied — short link, fits bios and chats."
+        ? updated
+          ? "Copied — the same link, now carrying this shelf."
+          : "Copied — short link, fits bios and chats."
         : "Copied — long link (cloud unreachable, still works)."
       : "Copy the link below manually.";
   });

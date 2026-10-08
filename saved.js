@@ -145,6 +145,7 @@
        change below goes through store.js and comes back here. */
     let current = k;
     let listOpen = false;
+    let dragFrom = null;
     const el = document.createElement("article");
     el.className = "panel kept";
 
@@ -294,24 +295,88 @@
       return b;
     }
 
-    /* Each row carries its own order controls: the list is where the order
-       matters, so the buttons sit one row away from the thing they move. */
+    /* Each row carries both ways to order it: drag the row, or press the arrows
+       (which are also the keyboard and touch path — a drag is a pointer-only
+       gesture). The list is where the order matters, so both live on the row. */
     function songRow(s, at, total) {
       const row = document.createElement("div");
       row.className = "kept-song";
       row.append(songCard(s));
       const bar = document.createElement("div");
       bar.className = "kept-move";
+      const grip = document.createElement("span");
+      grip.className = "kept-grip";
+      grip.textContent = "⠿";
+      grip.setAttribute("aria-hidden", "true");
       const pos = document.createElement("span");
       pos.className = "kept-pos";
       pos.textContent = String(at + 1).padStart(2, "0");
       bar.append(
+        grip,
         pos,
         moveBtn("↑", "Move “" + s.t + "” up", at === 0, () => move(at, -1)),
         moveBtn("↓", "Move “" + s.t + "” down", at === total - 1, () => move(at, 1)),
       );
       row.append(bar);
+      wireDrag(row, at);
       return row;
+    }
+
+    /* Dropping above a row lands before it, dropping below lands after it — the
+       line under the pointer says which. `to` is therefore an insertion point,
+       one past the end included, and the move target subtracts the row that
+       left when the shelf moved down. */
+    function clearDropMarks() {
+      songsBox.querySelectorAll(".kept-song").forEach((r) => r.classList.remove("drop-before", "drop-after"));
+    }
+
+    function wireDrag(row, at) {
+      row.draggable = true;
+      row.addEventListener("dragstart", (e) => {
+        dragFrom = at;
+        row.classList.add("dragging");
+        if (e.dataTransfer) {
+          e.dataTransfer.effectAllowed = "move";
+          // Firefox refuses to start a drag without some payload.
+          e.dataTransfer.setData("text/plain", String(at));
+        }
+      });
+      row.addEventListener("dragend", () => {
+        dragFrom = null;
+        row.classList.remove("dragging");
+        clearDropMarks();
+      });
+      row.addEventListener("dragover", (e) => {
+        if (dragFrom == null || dragFrom === at) return;
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        const below = e.clientY - row.getBoundingClientRect().top > row.getBoundingClientRect().height / 2;
+        clearDropMarks();
+        row.classList.add(below ? "drop-after" : "drop-before");
+      });
+      row.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const from = dragFrom;
+        dragFrom = null;
+        clearDropMarks();
+        if (from == null) return;
+        const below = e.clientY - row.getBoundingClientRect().top > row.getBoundingClientRect().height / 2;
+        dropAt(from, below ? at + 1 : at);
+      });
+    }
+
+    function dropAt(from, to) {
+      const target = to > from ? to - 1 : to;
+      if (target === from || target < 0 || target >= current.songs.length) return;
+      const moved = current.songs[from];
+      const next = store.moveKeptSongTo(current.id, from, target);
+      if (!next) {
+        say("Could not reorder that shelf.");
+        return;
+      }
+      current = next;
+      paintSongs();
+      say("Moved “" + moved.t + "” to position " + (target + 1) + ".");
     }
 
     /* Reordering repaints the rows only: the name, the note, the panel and the
